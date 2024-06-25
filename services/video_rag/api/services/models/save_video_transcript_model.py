@@ -1,0 +1,2 @@
+class SaveVideoTranscriptmodel:
+    result: str

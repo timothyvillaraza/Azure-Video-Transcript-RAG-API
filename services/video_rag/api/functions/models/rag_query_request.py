@@ -1,4 +1,4 @@
 from pydantic import BaseModel
 
-class QueryRequest(BaseModel):
+class RagQueryRequest(BaseModel):
     query: str

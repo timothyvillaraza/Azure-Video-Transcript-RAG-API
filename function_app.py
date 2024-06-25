@@ -2,12 +2,12 @@ import azure.functions as func
 import logging
 import csv
 import codecs
-from services.example_service.api.functions.myfunction import bp as blueprint_service_test
-from services.video_rag.api.functions.video_rag import bp as blueprint_video_rag
+from services.example_service.api.functions.myfunction import bp as blueprint_service_test_functions
+from services.video_rag.api.functions.video_rag_functions import bp as blueprint_video_rag_functions
 
 app = func.FunctionApp()
-app.register_blueprint(blueprint_service_test)
-app.register_blueprint(blueprint_video_rag)
+app.register_blueprint(blueprint_service_test_functions)
+app.register_blueprint(blueprint_video_rag_functions)
 
 @app.function_name('FirstHTTPFunction')
 @app.route(route="firstroute", auth_level=func.AuthLevel.FUNCTION)

@@ -1,4 +1,4 @@
 # function requests and responses
 
-class QueryResponse():
+class RagQueryResponse():
     response: str

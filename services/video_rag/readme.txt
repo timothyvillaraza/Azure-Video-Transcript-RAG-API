@@ -1,0 +1,1 @@
+This project structure is based off of the black rock architecure for .NET. Might not translate 1:1 for python but I put the structure here anyways.

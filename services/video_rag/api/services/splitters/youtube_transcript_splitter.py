@@ -1,7 +1,7 @@
 from typing import List
-from langchain.schema import Chunker
+from langchain.text_splitter import TextSplitter
 
-class YouTubeTranscriptSplitter(Chunker):
+class YouTubeTranscriptSplitter(TextSplitter):
     def __init__(self, captions_per_chunk=1000):
         self.captions_per_chunk = captions_per_chunk
 

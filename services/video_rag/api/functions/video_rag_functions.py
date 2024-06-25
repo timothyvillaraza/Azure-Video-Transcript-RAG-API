@@ -36,15 +36,16 @@ def save_video_transcript(req: func.HttpRequest) -> func.HttpResponse:
     # Validate Request
 
     # Service Layer Call
-    saveVideoTranscriptModel = videoRagService.save_video_transcript(request)
+    saveVideoTranscriptModel = videoRagService.save_video_transcript(request.video_ids)
     
     # Map to response
     # response = response_model
-    response = SaveVideoTranscriptResponse()
-    response.response = f"Your Request: {saveVideoTranscriptModel.query}"
+    # response = SaveVideoTranscriptResponse()
+    # response.response = f"Your Request:"
     
     return func.HttpResponse(
-            json.dumps(response.__dict__),
+            "Success",
+            # json.dumps(response.__dict__),
             status_code=200
     )
 

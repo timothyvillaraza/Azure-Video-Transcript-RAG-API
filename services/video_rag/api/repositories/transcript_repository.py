@@ -18,7 +18,7 @@ class TranscriptRepository:
         self.collection_name = 'transcripts'
         
         # Construct the connection string
-        self.CONNECTION_STRING = f"{PG_VECTOR_DRIVER}://{PG_VECTOR_USER}:{PG_VECTOR_PASSWORD}@{PG_VECTOR_HOST}:{PG_VECTOR_PORT}/{PG_VECTOR_DATABASE_NAME}?sslmode=require"
+        self.CONNECTION_STRING = f"{PG_VECTOR_DRIVER}://{PG_VECTOR_USER}:{PG_VECTOR_PASSWORD}@{PG_VECTOR_HOST}:{PG_VECTOR_PORT}/{PG_VECTOR_DATABASE_NAME}"
         
         self.vectorstore = PGVector(
             embeddings=self.open_ai_embeddings,
@@ -26,6 +26,7 @@ class TranscriptRepository:
             connection=self.CONNECTION_STRING,
             use_jsonb=True,
         )
-    
+        
     def save_transcript_embeddings(self, documents: List[Document]):
         self.vectorstore.add_documents(documents)
+        pass

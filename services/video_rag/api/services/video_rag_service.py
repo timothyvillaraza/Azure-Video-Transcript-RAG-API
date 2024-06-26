@@ -41,7 +41,8 @@ class VideoRagService:
         
         return tempModelResponse
 
-def _create_documents(self, transcripts: Dict[str, List[Dict[str, str]]]) -> List[str]:
+# Helper Function
+def _create_documents(transcripts: Dict[str, List[Dict[str, str]]]) -> List[str]:
     # Collection of Document class objects created for each chunk
     documents = []
     

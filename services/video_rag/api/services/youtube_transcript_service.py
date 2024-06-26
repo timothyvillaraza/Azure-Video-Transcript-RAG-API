@@ -2,7 +2,6 @@ import logging
 from typing import Dict, List
 # from googleapiclient.discovery import build
 from youtube_transcript_api import YouTubeTranscriptApi
-from services.video_rag.api.services.splitters.youtube_transcript_splitter import YouTubeTranscriptSplitter
 
 
 class YouTubeTranscriptService:    

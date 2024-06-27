@@ -30,7 +30,20 @@ Starting Project:
     func start on root directory
     pip install from requirements.txt
     func start (if 7071 is taken, do func start --port 5004 or any other port)
+        Or add   "Host": {
+                "LocalHttpPort": 5004
+            }
+        to localsettings.json
     Can debug with Python F5
+    Set environment variables
+        OPENAI_KEY
+
+        PG_VECTOR_DRIVER = 'postgresql+psycopg'
+        PG_VECTOR_USER
+        PG_VECTOR_PASSWORD
+        PG_VECTOR_HOST
+        PG_VECTOR_PORT
+        PG_VECTOR_DATABASE_NAME
 
     
 
@@ -45,6 +58,7 @@ Starting Project:
 Azure Infra Setup:
     There's a DeployResources project
     azd something command on DeployResouces/deploy-functions-resources.ps1, would have to set unique names
+    Set environment variables for the function app
 
     Create Postgres DB then add extension from portal side
         - Connect and run SQL query: {SQL QUERY FOR EXTENSION VECTOR HERE}
@@ -73,5 +87,3 @@ Testing Endpoints:
 
 Set Environment Variables on Function App:
     OPEN_AI KEY and a bunch of other PGVector Keys
-
-

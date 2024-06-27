@@ -14,7 +14,7 @@ from services.video_rag.api.functions.models.save_video_transcript_response impo
 bp = func.Blueprint()
 
 # Service Registration
-videoRagService = VideoRagService()
+_videoRagService = VideoRagService()
 
 @bp.function_name('SaveVideoTranscript')
 @bp.route(route="savevideotranscript", methods=[func.HttpMethod.POST])
@@ -34,19 +34,20 @@ def save_video_transcript(req: func.HttpRequest) -> func.HttpResponse:
         )
         
     # Validate Request
+    # Validation logic
 
     # Service Layer Call
-    saveVideoTranscriptModel = videoRagService.save_video_transcript(request.video_ids)
+    video_transcript_model = _videoRagService.save_video_transcript_embeddings(request.video_ids)
     
     # Map to response
-    # response = response_model
-    # response = SaveVideoTranscriptResponse()
-    # response.response = f"Your Request:"
+    save_video_transcript_response = save_video_transcript_response = SaveVideoTranscriptResponse(
+        successful_video_ids=video_transcript_model.successful_video_ids,
+        failed_video_ids=video_transcript_model.failed_video_ids
+    )
     
     return func.HttpResponse(
-            "Success",
-            # json.dumps(response.__dict__),
-            status_code=200
+        save_video_transcript_response.model_dump_json(), # Pydantic Method
+        status_code=200
     )
 
 @bp.function_name('GetInference')

@@ -1,8 +1,10 @@
 import os
+import logging
 from typing import List
 from langchain.docstore.document import Document
 from langchain_postgres import PGVector
 from langchain_openai import OpenAIEmbeddings
+from services.video_rag.api.repositories.models.transcript_embeddings_dto import TranscriptEmbeddingsDto
 
 # Ensure the environment variables are correctly set
 PG_VECTOR_DRIVER = os.getenv('PG_VECTOR_DRIVER')
@@ -27,6 +29,26 @@ class TranscriptRepository:
             use_jsonb=True,
         )
         
-    def save_transcript_embeddings(self, documents: List[Document]):
-        self.vectorstore.add_documents(documents)
-        pass
+    def save_transcript_embeddings(self, documents: List[Document]) -> TranscriptEmbeddingsDto:
+        successful_video_ids = []
+        failed_video_ids = []
+
+        for video_id, docs_list in documents.items():
+            try:
+                self.vectorstore.add_documents(docs_list)
+                successful_video_ids.append(video_id)
+            except Exception as e:
+                failed_video_ids.append(video_id)
+                print(f"Error adding documents for video_id: {video_id}. Error: {e}")
+
+        # Transcript DTO
+        return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)
+    
+    def drop_all_embeddings(self) -> bool:
+        try:
+            self.vectorstore.drop_tables()
+            logging.info("Successfully dropped all embeddings.")
+            return True
+        except Exception as e:
+            logging.error(f"Failed to drop embeddings: {str(e)}")
+            return False

@@ -1,4 +1,4 @@
-# Project Name
+# Azure Video Transcript Retrieval Augmented Generation API 
 
 ## Overview
 

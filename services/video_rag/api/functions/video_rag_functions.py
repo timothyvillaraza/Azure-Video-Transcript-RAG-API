@@ -28,10 +28,7 @@ def save_video_transcript(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
         
-        return func.HttpResponse(
-            "Error Message",
-            status_code=400
-        )
+        return func.HttpResponse("Error Message", status_code=400)
         
     # Validate Request
     # Validation logic
@@ -45,10 +42,7 @@ def save_video_transcript(req: func.HttpRequest) -> func.HttpResponse:
         failed_video_ids=video_transcript_model.failed_video_ids
     )
     
-    return func.HttpResponse(
-        save_video_transcript_response.model_dump_json(), # Pydantic Method
-        status_code=200
-    )
+    return func.HttpResponse(save_video_transcript_response.model_dump_json(), status_code=200)
 
 @bp.function_name('GetInference')
 @bp.route(route="getinference", methods=[func.HttpMethod.GET])
@@ -62,10 +56,7 @@ def get_inference(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
         
-        return func.HttpResponse(
-            "Error Message",
-            status_code=400
-        )
+        return func.HttpResponse("Error Message", status_code=400)
         
     # Validate Request
 

@@ -87,3 +87,31 @@ Testing Endpoints:
 
 Set Environment Variables on Function App:
     OPEN_AI KEY and a bunch of other PGVector Keys
+
+Adding Database Tables
+    SQLAlchemy and Alembic
+    Make sure new to create a shared declared_base() defined in services/[servicen name]/repositories/models/__init__.py
+    Any models should import from that
+        example:
+            # __init__.py 
+            from sqlalchemy.orm import declarative_base
+
+            Base = declarative_base()
+
+            # mymodel.py
+            from services.video_rag.api.repositories.models import Base
+
+            class VideoDto(Base):
+
+    Make sure that in the alembic env.py, the Base from __init__.py from above is added if it's new
+        # env.py from alembic generated folder
+        from services.video_rag.api.repositories.models import Base as video_rag_base
+
+        target_metadata = [
+            video_rag_base.metadata
+        ]
+
+Deploying Migrations (Putting Tables Online)
+    env.py put in connection string in .env
+    alembic revision --autogenerate -m "message"
+    alembic upgrade head

@@ -4,7 +4,8 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from dotenv import load_dotenv
 
-from services.video_rag.api.repositories.models import Base as video_rag_base
+from alembic_migrations.config.autogenerate_base_metadatas import autogenerate_base_metadatas
+from alembic_migrations.config.autogenerate_excluded_tables import autogenerate_excluded_tables
 
 # Load environment variables from .env file
 load_dotenv()
@@ -24,9 +25,19 @@ config.set_section_option(section, "DB_CONNECTION_STRING", os.environ.get("DB_CO
 # Add your model's MetaData object here for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [
-    video_rag_base.metadata
-]
+target_metadata = autogenerate_base_metadatas
+
+# Function to exclude database tables not managed by SQLAlchemy
+def include_object(object, name, type_, reflected, compare_to):
+    print(f"Processing object: name={name}, type={type_}, reflected={reflected}")
+    if type_ == "table":
+        if name in autogenerate_excluded_tables:
+            print(f"Excluding table: {name}")
+            return False
+        else:
+            print(f"Including table: {name}")
+            return True
+    return True
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -50,6 +61,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object
     )
 
     with context.begin_transaction():
@@ -69,7 +81,9 @@ def run_migrations_online() -> None:
 
     with connectable.connect() as connection:
         context.configure(
-            connection=connection, target_metadata=target_metadata
+            connection=connection,
+            target_metadata=target_metadata,
+            include_object=include_object
         )
 
         with context.begin_transaction():

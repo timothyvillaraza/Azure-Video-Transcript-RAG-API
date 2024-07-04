@@ -1,10 +1,13 @@
 import os
 import logging
 from typing import List
+from services.video_rag.api.repositories.models.video_dto import VideoDto
 from langchain.docstore.document import Document
 from langchain_postgres import PGVector
 from langchain_openai import OpenAIEmbeddings
 from services.video_rag.api.repositories.models.transcript_embeddings_dto import TranscriptEmbeddingsDto
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 # Ensure the environment variables are correctly set
 PG_VECTOR_DRIVER = os.getenv('PG_VECTOR_DRIVER')
@@ -22,6 +25,7 @@ class TranscriptRepository:
         # Construct the connection string
         self.CONNECTION_STRING = f"{PG_VECTOR_DRIVER}://{PG_VECTOR_USER}:{PG_VECTOR_PASSWORD}@{PG_VECTOR_HOST}:{PG_VECTOR_PORT}/{PG_VECTOR_DATABASE_NAME}"
         
+        # LANGCHAIN CONNECTION
         self.vectorstore = PGVector(
             embeddings=self.open_ai_embeddings,
             collection_name=self.collection_name,
@@ -29,21 +33,35 @@ class TranscriptRepository:
             use_jsonb=True,
         )
         
+        # SQLALCHEMY CONNECTION
+        self.engine = create_engine(self.CONNECTION_STRING)
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
+        
     def save_transcript_embeddings(self, documents: List[Document]) -> TranscriptEmbeddingsDto:
         successful_video_ids = []
         failed_video_ids = []
 
-        for video_id, docs_list in documents.items():
+        for external_video_id, docs_list in documents.items():
             try:
+                # Add document to db through langchain's vectorstore
                 self.vectorstore.add_documents(docs_list)
-                successful_video_ids.append(video_id)
+                
+                # Add video id to db through sqlalchemy's session
+                new_video = VideoDto(external_video_id=external_video_id, user_id='TODO')
+                self.session.add(new_video)
+                self.session.commit()
+                
+                successful_video_ids.append(external_video_id)
             except Exception as e:
-                failed_video_ids.append(video_id)
-                print(f"Error adding documents for video_id: {video_id}. Error: {e}")
+                failed_video_ids.append(external_video_id)
+                self.session.rollback() 
+                print(f"Error adding documents for video_id: {external_video_id}. Error: {e}")
 
         # Transcript DTO
         return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)
     
+    # Currently a DEBUG Function.
     def drop_all_embeddings(self) -> bool:
         try:
             self.vectorstore.drop_tables()

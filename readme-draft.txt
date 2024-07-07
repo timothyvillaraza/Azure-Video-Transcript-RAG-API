@@ -29,7 +29,21 @@ Starting Project:
     Python 3.11.2
     func start on root directory
     pip install from requirements.txt
-    func start (if 7071 is taken, do func start --port 5004 or any other port)
+    Create local.settings.json
+    {
+        "IsEncrypted": false,
+        "Values": {
+        "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+        "FUNCTIONS_WORKER_RUNTIME": "python"
+        },
+        "Host": {
+            "LocalHttpPort": 7073
+        }
+    }
+    func start on root directory
+    pip install from requirements.txt
+
+    func start (if 7073 is taken, do func start --port 5004 or any other port)
         Or add   "Host": {
                 "LocalHttpPort": 5004
             }

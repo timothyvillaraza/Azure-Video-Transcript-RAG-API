@@ -50,16 +50,16 @@ Starting Project:
         to localsettings.json
     Can debug with Python F5
     Set environment variables
-        OPENAI_KEY
+        OPENAI_KEY = 
 
         PG_VECTOR_DRIVER = 'postgresql+psycopg'
-        PG_VECTOR_USER
-        PG_VECTOR_PASSWORD
-        PG_VECTOR_HOST
-        PG_VECTOR_PORT
-        PG_VECTOR_DATABASE_NAME
+        PG_VECTOR_USER = 
+        PG_VECTOR_PASSWORD = 
+        PG_VECTOR_HOST = 
+        PG_VECTOR_PORT = 
+        PG_VECTOR_DATABASE_NAME = 
 
-        DB_CONNECTION_STRING = 'postgresql+psycopg://timothy_villaraza:MyPassword!@mypostgresdb.postgres.database.azure.com:5432/postgres'
+        DB_CONNECTION_STRING =
 
     
 

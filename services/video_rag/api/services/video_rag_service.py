@@ -33,7 +33,7 @@ class VideoRagService:
         # Map from repository dto to service model
         transcript_embeddings_model =  TranscriptEmbeddingsModel(transcript_embeddings_dto.successful_video_ids, failed_video_ids)
         
-        return transcript_embeddings_model()
+        return transcript_embeddings_model
     
     def get_inference(self, user_id: str, query: str, create_date: datetime) -> InferenceModel:
         # Get Relevant Documents from Repository

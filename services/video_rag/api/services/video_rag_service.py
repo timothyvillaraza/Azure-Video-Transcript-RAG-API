@@ -1,22 +1,23 @@
-import os
-import langchain
 from typing import Dict, List
-from langchain_openai import OpenAIEmbeddings
-from langchain_postgres import PGVector
+from datetime import datetime
 from langchain.docstore.document import Document
-from langchain_openai import OpenAIEmbeddings
-
-
-from services.video_rag.api.services.models.save_video_transcript_model import TranscriptEmbeddingsModel
+# Services
 from services.video_rag.api.services.youtube_transcript_service import YouTubeTranscriptService
+# Repositories
 from services.video_rag.api.repositories.transcript_repository import TranscriptRepository
+# Chains
+from services.video_rag.api.langchain.video_rag_chain import VideoRAGChain
+# Models
+from services.video_rag.api.services.models.inference_model import InferenceModel
+from services.video_rag.api.services.models.transcript_embedding_model import TranscriptEmbeddingsModel
 
 class VideoRagService:
     def __init__(self):
         self._youtubeTranscriptService = YouTubeTranscriptService()
         self._transcriptRepository = TranscriptRepository()
+        self._video_rag_chain = VideoRAGChain()
     
-    def save_video_transcript_embeddings(self, video_ids: List[str]) -> TranscriptEmbeddingsModel:
+    def save_video_transcript_embeddings(self, user_id: str, video_ids: List[str]) -> TranscriptEmbeddingsModel:
         # Get Transcripts
         transcripts, failed_video_ids = self._youtubeTranscriptService.get_youtube_transcripts_async(video_ids)
         
@@ -32,20 +33,23 @@ class VideoRagService:
         # Map from repository dto to service model
         transcript_embeddings_model =  TranscriptEmbeddingsModel(transcript_embeddings_dto.successful_video_ids, failed_video_ids)
         
-        return transcript_embeddings_model
+        return transcript_embeddings_model()
     
-    def get_video_transcript(self, video_ids: List[str]):
-        tempModelResponse = TranscriptEmbeddingsModel()
-
-        self._youtubeTranscriptService.get_youtube_transcripts_async(video_ids)
+    def get_inference(self, user_id: str, query: str, create_date: datetime) -> InferenceModel:
+        # Get Relevant Documents from Repository
+        retrieved_documents = self._transcriptRepository.get_by_semantic_relevance(query, 1)
         
-        # Chunk Transcripts
-        # Embed Transcripts
-        # Save Transcripts to PG Vector
         
-        return tempModelResponse
+        # Get response from LLM
+        # self._video_rag_chain
+        
+        
+        pass
+        # return inference_model()
 
-# Helper Function
+# =======================================
+# Helper Functions
+# =======================================
 def _create_documents(transcripts: Dict[str, List[Dict[str, str]]]) -> Dict[str, List[Document]]:
     # Return
     created_documents = {}

@@ -37,10 +37,11 @@ class TranscriptRepository:
         self.engine = create_engine(self.CONNECTION_STRING)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
-        
+    
+    # TODO: Make Async
     def save_transcript_embeddings(self, documents: List[Document]) -> TranscriptEmbeddingsDto:
-        successful_video_ids = []
-        failed_video_ids = []
+        successful_video_ids = [] # IDs of videos that sucessfully generated and save embeddings
+        failed_video_ids = [] # IDs of videos that failed generated and save embeddings
 
         for external_video_id, docs_list in documents.items():
             try:
@@ -60,6 +61,12 @@ class TranscriptRepository:
 
         # Transcript DTO
         return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)
+    
+    # TODO: Make Async
+    def get_by_semantic_relevance(self, query: str, results_count: int = 1) -> List[Document]:
+        # async: asimilary_search
+        # TODO: Add try catch block
+        return self.vectorstore.similarity_search(query, results_count)
     
     # Currently a DEBUG Function.
     def drop_all_embeddings(self) -> bool:

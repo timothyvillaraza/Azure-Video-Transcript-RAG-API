@@ -34,7 +34,7 @@ def save_video_transcript(req: func.HttpRequest) -> func.HttpResponse:
     # Validation logic
 
     # Service Layer Call
-    video_transcript_model = _videoRagService.save_video_transcript_embeddings(request.video_ids)
+    video_transcript_model = _videoRagService.save_video_transcript_embeddings("TODO: USER_ID", request.video_ids)
     
     # Map to response
     save_video_transcript_response = save_video_transcript_response = SaveVideoTranscriptResponse(
@@ -61,7 +61,7 @@ def get_inference(req: func.HttpRequest) -> func.HttpResponse:
     # Validate Request
 
     # Service Layer Call
-    # response_model = service.method()
+    get_inference_model = _videoRagService.get_inference(request.user_id, request.query, request.create_date)
     
     # Map to response
     # response = response_model

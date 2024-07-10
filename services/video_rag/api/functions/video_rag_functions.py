@@ -45,7 +45,7 @@ def save_video_transcript(req: func.HttpRequest) -> func.HttpResponse:
     return func.HttpResponse(save_video_transcript_response.model_dump_json(), status_code=200)
 
 @bp.function_name('GetInference')
-@bp.route(route="getinference", methods=[func.HttpMethod.GET])
+@bp.route(route="getinference", methods=[func.HttpMethod.POST])
 def get_inference(req: func.HttpRequest) -> func.HttpResponse:
     # Log for Azure App Insights
     logging.info('Python HTTP trigger function processed a request.')

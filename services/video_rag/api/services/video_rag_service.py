@@ -1,3 +1,6 @@
+# TODO: REMOVE
+import uuid
+
 from typing import Dict, List
 from datetime import datetime
 from langchain.docstore.document import Document
@@ -15,7 +18,6 @@ class VideoRagService:
     def __init__(self):
         self._youtubeTranscriptService = YouTubeTranscriptService()
         self._transcriptRepository = TranscriptRepository()
-        self._video_rag_chain = VideoRAGChain()
     
     def save_video_transcript_embeddings(self, user_id: str, video_ids: List[str]) -> TranscriptEmbeddingsModel:
         # Get Transcripts
@@ -41,8 +43,9 @@ class VideoRagService:
         
         
         # Get response from LLM
-        # self._video_rag_chain
-        
+        TEMP_UUID_SESSION_ID = "123e4567-e89b-12d3-a456-426614174000" # str(uuid.uuid4())
+        video_rag_chain = VideoRAGChain()
+        llm_response = video_rag_chain.get_inference_with_context(TEMP_UUID_SESSION_ID, query, retrieved_documents)
         
         pass
         # return inference_model()

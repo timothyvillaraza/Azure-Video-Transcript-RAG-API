@@ -32,13 +32,15 @@ class VideoRAGChain:
     def get_inference_with_context(self, session_id: str, user_query: str, context: List[Document]):
         # Define the system template using Jinja2
         system_template = """
-        Only answer responding with the information from the CONTEXT or chat history. Otherwise say you don't know and why.
+        SYSTEM PROMPT:
+        Only answer responding with the information from the TRANSCRIPT CHUNK. TIME STAMPS MUST BE INCLUDED.
         
         Your response also must include all sources of your answer.
-            - Video transcript sources need time stamps
-            - Chat history sources need a quote and distinguishes user or ai.
+            - Video transcript sources need time stamps from the TRANSCRIPT CHUNK provided below
+            
+        If no time stamp can be provided in the final answer, respond with "There is not enough information provided."
 
-        CONTEXT:
+        TRANSCRIPT CHUNK:
         {{ context }}
         """
         
@@ -49,11 +51,11 @@ class VideoRAGChain:
         formatted_system_message = Template(system_template).render(context=context_content)
         
         # Create a SystemMessagePromptTemplate from the formatted system message
-        smpt = SystemMessagePromptTemplate.from_template(formatted_system_message)
+        system_message_prompt = SystemMessagePromptTemplate.from_template(formatted_system_message)
         
         # Define the complete prompt template
         prompt = ChatPromptTemplate.from_messages([
-            smpt,  # System message with context
+            system_message_prompt,  # System message with context
             MessagesPlaceholder(variable_name="history"),  # Placeholder for chat history
             HumanMessagePromptTemplate.from_template("{input}")  # Human message prompt
         ])

@@ -1,4 +1,6 @@
-# function requests and responses
+from pydantic import BaseModel
+from typing import List
 
-class GetInferenceResponse():
+
+class GetInferenceResponse(BaseModel):
     response: str

@@ -1,22 +1,14 @@
-"""
-TODO:
-Implemented conversation memory by following: https://python.langchain.com/v0.2/docs/how_to/message_history/
-This implementation is not using conversation summary buffer memory
-Right now, it can't answer the question: "List out all of my previous questions", to which it responds "I don't know".
-I need to figure out how to debug what is being sent to ChatGPT 3.5
-I need to figure out how to implement a conversation summary buffer memory to optimize
-"""
 
 import os
 from typing import List
 import psycopg
+from jinja2 import Template
+from langchain.prompts import SystemMessagePromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate, ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from langchain_postgres import PostgresChatMessageHistory
 from langchain.docstore.document import Document
-from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain_core.runnables.history import RunnableWithMessageHistory
-from langchain_core.chat_history import BaseChatMessageHistory
-from langchain.memory.summary_buffer import ConversationSummaryBufferMemory
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationChain
 
 class VideoRAGChain:
     def __init__(self):
@@ -31,62 +23,53 @@ class VideoRAGChain:
         self.table_name = "chat_message"
         PostgresChatMessageHistory.create_tables(self.sync_connection, self.table_name)
         
-    def get_session_history(self, session_id) -> BaseChatMessageHistory:
-        pg_chat_message_history = PostgresChatMessageHistory(
-            self.table_name,
-            session_id,
-            sync_connection=self.sync_connection
-        )
+    def get_session_history_memory(self, session_id) -> ConversationBufferMemory:
+        pg_chat_message_history = PostgresChatMessageHistory(self.table_name, session_id, sync_connection=self.sync_connection)
         
-        conversation_buffer_memory = ConversationSummaryBufferMemory(
-            llm=self.chat_model,
-            chat_memory = pg_chat_message_history,
-            memory_key='history'
-        )
+        return ConversationBufferMemory(llm=self.chat_model, chat_memory=pg_chat_message_history, memory_key='history', max_token_limit=100, return_messages=True)
 
-        # TODO: FIGURE OUT WHAT TO RETURN, CHANGE THIS OR THE CHAIN
-        return conversation_buffer_memory.chat_memory
         
-    def get_inference_with_context(self, session_id: str, query: str, context: List[Document]):
-        prompt = ChatPromptTemplate.from_messages(
-            [
-                (
-                    "system",
-                    """
-                    SYSTEM: You are a helpful AI Assistant.
-                    
-                    Answer the question by only responding with the information from the CONTEXT or chat history. Otherwise say you don't know.
-                    
-                    Your response also must include the all sources of your answer.
-                        - Video transcript sources need time stamps
-                        - Chat history sources need a quote and distinguishes user or ai.
-                    
-                    CONTEXT:
-                    {context}
-                    """,
-                ),
-                MessagesPlaceholder(variable_name="history"),
-                ("human", "{query}"),
-            ]
-        )
+    def get_inference_with_context(self, session_id: str, user_query: str, context: List[Document]):
+        # Define the system template using Jinja2
+        system_template = """
+        Only answer responding with the information from the CONTEXT or chat history. Otherwise say you don't know and why.
         
-        runnable = prompt | self.chat_model 
-        
-        runnable_with_history = RunnableWithMessageHistory(
-            runnable,
-            self.get_session_history,
-            input_messages_key="query",
-            history_messages_key="history",
-        )
+        Your response also must include all sources of your answer.
+            - Video transcript sources need time stamps
+            - Chat history sources need a quote and distinguishes user or ai.
+
+        CONTEXT:
+        {{ context }}
+        """
         
         # Format the context for the prompt
         context_content = " ".join([doc.page_content for doc in context])
-
-        response = runnable_with_history.invoke(
-            {"context": context_content, "query": query},
-            config={"configurable": {"session_id": session_id}},
+        
+        # Render the system message with context
+        formatted_system_message = Template(system_template).render(context=context_content)
+        
+        # Create a SystemMessagePromptTemplate from the formatted system message
+        smpt = SystemMessagePromptTemplate.from_template(formatted_system_message)
+        
+        # Define the complete prompt template
+        prompt = ChatPromptTemplate.from_messages([
+            smpt,  # System message with context
+            MessagesPlaceholder(variable_name="history"),  # Placeholder for chat history
+            HumanMessagePromptTemplate.from_template("{input}")  # Human message prompt
+        ])
+        
+        # Initialize the conversation chain with the formatted prompt
+        runnable = ConversationChain(
+            prompt=prompt,
+            llm=self.chat_model,
+            memory=self.get_session_history_memory(session_id),
+            verbose=True
         )
 
         # Use the chain with memory
-        return response
+        llm_response = runnable.invoke({
+            "input": user_query
+        })
+        
+        return llm_response['response']
         

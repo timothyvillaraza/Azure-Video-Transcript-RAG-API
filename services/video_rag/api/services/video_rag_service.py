@@ -47,8 +47,10 @@ class VideoRagService:
         video_rag_chain = VideoRAGChain()
         llm_response = video_rag_chain.get_inference_with_context(TEMP_UUID_SESSION_ID, query, retrieved_documents)
         
-        pass
-        # return inference_model()
+        
+        inference_model = InferenceModel(response=llm_response)
+        
+        return inference_model
 
 # =======================================
 # Helper Functions

@@ -65,10 +65,11 @@ def get_inference(req: func.HttpRequest) -> func.HttpResponse:
     
     # Map to response
     # response = response_model
-    response = GetInferenceResponse()
-    response.response = f"Your Request: {request.query}"
+    get_inference_response = GetInferenceResponse(
+        response=get_inference_model.response
+    )
     
     return func.HttpResponse(
-            json.dumps(response.__dict__),
-            status_code=200
+        get_inference_response.model_dump_json(),
+        status_code=200
     )

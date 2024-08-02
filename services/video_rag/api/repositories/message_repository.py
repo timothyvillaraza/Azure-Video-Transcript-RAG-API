@@ -1,45 +1,30 @@
 import os
-import logging
 from typing import List
-from services.video_rag.api.repositories.models.video_dto import VideoDto
-from services.video_rag.api.repositories.models.transcript_embeddings_dto import TranscriptEmbeddingsDto
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-from langchain import LangChain 
-
-lc = LangChain(db_config={
-    'host': 'your_db_host',
-    'port': 'your_db_port',
-    'username': 'your_db_username',
-    'password': 'your_db_password',
-    'database': 'your_db_name'
-})
-
-
-
-# Ensure the environment variables are correctly set
-PG_VECTOR_DRIVER = os.getenv('PG_VECTOR_DRIVER')
-PG_VECTOR_USER = os.getenv('PG_VECTOR_USER')
-PG_VECTOR_PASSWORD = os.getenv('PG_VECTOR_PASSWORD')
-PG_VECTOR_HOST = os.getenv('PG_VECTOR_HOST')
-PG_VECTOR_PORT = os.getenv('PG_VECTOR_PORT')
-PG_VECTOR_DATABASE_NAME = os.getenv('PG_VECTOR_DATABASE_NAME')
+import psycopg
+from jinja2 import Template
+from langchain.prompts import SystemMessagePromptTemplate, MessagesPlaceholder, HumanMessagePromptTemplate, ChatPromptTemplate
+from langchain_openai import ChatOpenAI
+from langchain_postgres import PostgresChatMessageHistory
+from langchain.docstore.document import Document
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationChain
+from langchain_core.messages.base import BaseMessage
 
 class MessageRepository:
     def __init__(self):
-        # Construct the connection string
-        self.CONNECTION_STRING = f"{PG_VECTOR_DRIVER}://{PG_VECTOR_USER}:{PG_VECTOR_PASSWORD}@{PG_VECTOR_HOST}:{PG_VECTOR_PORT}/{PG_VECTOR_DATABASE_NAME}"
+        # LLM Model
+        self.chat_model = ChatOpenAI(model="gpt-3.5-turbo", api_key=os.getenv('OPENAI_KEY'))
         
-        # SQLALCHEMY CONNECTION
-        self.engine = create_engine(self.CONNECTION_STRING)
-        self.Session = sessionmaker(bind=self.engine)
-        self.session = self.Session()
-    
-    # TODO: Make Async
-    async def get_message_history_async(self, session_id) -> TranscriptEmbeddingsDto:
-        successful_video_ids = [] # IDs of videos that sucessfully generated and save embeddings
-        failed_video_ids = [] # IDs of videos that failed generated and save embeddings
+        # Establish a synchronous connection to the database
+        # (or use psycopg.AsyncConnection for async)
+        self.sync_connection = psycopg.connect(os.getenv('PG_CONNECTION_STRING'))
         
-        # Transcript DTO
-        return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)
+        # Create the table schema (only needs to be done once)
+        self.table_name = "chat_message"
+        PostgresChatMessageHistory.create_tables(self.sync_connection, self.table_name)
+
+    async def get_session_history_memory_async(self, session_id) -> List[BaseMessage]:     
+        # Connection interface to langchain managed conversation history
+        pg_chat_message_history = PostgresChatMessageHistory(self.table_name, session_id, sync_connection=self.sync_connection)
+        
+        return pg_chat_message_history.messages

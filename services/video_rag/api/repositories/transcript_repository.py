@@ -20,7 +20,7 @@ PG_VECTOR_DATABASE_NAME = os.getenv('PG_VECTOR_DATABASE_NAME')
 class TranscriptRepository:
     def __init__(self):
         self.open_ai_embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_KEY"))
-        self.collection_name = 'transcripts'
+        self.collection_name = 'transcripts' # Used as entry in DB. SELECT * FROM langchain_pg_collection 
         
         # Construct the connection string
         self.CONNECTION_STRING = f"{PG_VECTOR_DRIVER}://{PG_VECTOR_USER}:{PG_VECTOR_PASSWORD}@{PG_VECTOR_HOST}:{PG_VECTOR_PORT}/{PG_VECTOR_DATABASE_NAME}"

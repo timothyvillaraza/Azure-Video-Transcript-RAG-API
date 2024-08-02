@@ -19,13 +19,14 @@ class VideoRAGChain:
         # (or use psycopg.AsyncConnection for async)
         self.sync_connection = psycopg.connect(os.getenv('PG_CONNECTION_STRING'))
         
-        # Create the table schema (only needs to be done once)
+        # Create the table schema to store messages (only needs to be done once)
         self.table_name = "chat_message"
         PostgresChatMessageHistory.create_tables(self.sync_connection, self.table_name)
         
+    # Helper Function
     def get_session_history_memory(self, session_id) -> ConversationBufferMemory:
         pg_chat_message_history = PostgresChatMessageHistory(self.table_name, session_id, sync_connection=self.sync_connection)
-        
+
         return ConversationBufferMemory(llm=self.chat_model, chat_memory=pg_chat_message_history, memory_key='history', max_token_limit=100, return_messages=True)
 
         

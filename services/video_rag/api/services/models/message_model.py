@@ -1,5 +1,5 @@
 from typing import List
 
-class MessageModel:
+class ChatMessageModel:
     def __init__(self, response: str):
         self.response = response

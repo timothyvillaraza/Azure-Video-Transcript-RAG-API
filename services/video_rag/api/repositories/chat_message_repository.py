@@ -10,7 +10,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain.chains import ConversationChain
 from langchain_core.messages.base import BaseMessage
 
-class MessageRepository:
+class ChatMessageRepository:
     def __init__(self):
         # LLM Model
         self.chat_model = ChatOpenAI(model="gpt-3.5-turbo", api_key=os.getenv('OPENAI_KEY'))
@@ -23,7 +23,7 @@ class MessageRepository:
         self.table_name = "chat_message"
         PostgresChatMessageHistory.create_tables(self.sync_connection, self.table_name)
 
-    async def get_session_history_memory_async(self, session_id) -> List[BaseMessage]:     
+    async def get_chat_message_history_async(self, session_id) -> List[BaseMessage]:     
         # Connection interface to langchain managed conversation history
         pg_chat_message_history = PostgresChatMessageHistory(self.table_name, session_id, sync_connection=self.sync_connection)
         

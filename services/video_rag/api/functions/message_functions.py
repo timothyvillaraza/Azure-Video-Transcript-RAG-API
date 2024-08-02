@@ -2,7 +2,7 @@ import azure.functions as func
 import logging
 import json
 # Services
-from services.video_rag.api.services.message_service import MessageService
+from services.video_rag.api.services.message_service import ChatMessageService
 # Requests/Response
 from services.video_rag.api.functions.models.get_message_history_request import GetMessageHistoryRequest
 from services.video_rag.api.functions.models.get_message_history_response import GetMessageHistoryResponse
@@ -13,7 +13,7 @@ bp = func.Blueprint()
 
 # Service Registration
 # TODO: Create Message Service
-_messageService = MessageService()
+_messageService = ChatMessageService()
 
 @bp.function_name('GetMessageHistory')
 @bp.route(route="getmessagehistory", methods=[func.HttpMethod.POST])

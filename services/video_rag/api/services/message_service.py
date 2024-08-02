@@ -1,19 +1,19 @@
 from langchain_core.messages.base import BaseMessage
 from typing import Dict, List
 # Repositories
-from services.video_rag.api.repositories.message_repository import MessageRepository
+from services.video_rag.api.repositories.chat_message_repository import ChatMessageRepository
 # Models
-from services.video_rag.api.services.models.inference_model import InferenceModel
+from services.video_rag.api.services.models.message_model import ChatMessageModel
 
 
-class MessageService:
+class ChatMessageService:
     def __init__(self):
-        self._message_repository = MessageRepository()
+        self._chat_message_repository = ChatMessageRepository()
     
     async def get_message_history_async(self, session_id) -> List[BaseMessage]:
         # Get Relevant Documents from Repository
-        message_dtos = await self._messageRepository.get_message_history_async(session_id)
+        chat_message_dtos = await self._chat_message_repository.get_chat_message_history_async(session_id)
         
-        inference_model = InferenceModel(response=llm_response)
-        
+        # Map to dto to model
+        message_model
         return inference_model

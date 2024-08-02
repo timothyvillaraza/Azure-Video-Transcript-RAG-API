@@ -61,7 +61,9 @@ def get_inference(req: func.HttpRequest) -> func.HttpResponse:
     # Validate Request
 
     # Service Layer Call
-    get_inference_model = _videoRagService.get_inference(request.user_id, request.query, request.create_date)
+    # DEBUG
+    request.session_id = "123e4567-e89b-12d3-a456-426614174000" # str(uuid.uuid4())
+    get_inference_model = _videoRagService.get_inference(request.session_id, request.query, request.create_date)
     
     # Map to response
     # response = response_model

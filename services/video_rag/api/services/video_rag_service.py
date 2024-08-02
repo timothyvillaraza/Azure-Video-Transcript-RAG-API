@@ -37,15 +37,14 @@ class VideoRagService:
         
         return transcript_embeddings_model
     
-    def get_inference(self, user_id: str, query: str, create_date: datetime) -> InferenceModel:
+    def get_inference(self, session_id: str, query: str, create_date: datetime) -> InferenceModel:
         # Get Relevant Documents from Repository
         retrieved_documents = self._transcriptRepository.get_by_semantic_relevance(query, 1)
         
         
         # Get response from LLM
-        TEMP_UUID_SESSION_ID = "123e4567-e89b-12d3-a456-426614174000" # str(uuid.uuid4())
         video_rag_chain = VideoRAGChain()
-        llm_response = video_rag_chain.get_inference_with_context(TEMP_UUID_SESSION_ID, query, retrieved_documents)
+        llm_response = video_rag_chain.get_inference_with_context(session_id, query, retrieved_documents)
         
         
         inference_model = InferenceModel(response=llm_response)

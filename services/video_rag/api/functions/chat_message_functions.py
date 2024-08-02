@@ -16,7 +16,7 @@ bp = func.Blueprint()
 _messageService = ChatMessageService()
 
 @bp.function_name('GetChatMessageHistory')
-@bp.route(route="getchatmessagehistory", methods=[func.HttpMethod.POST])
+@bp.route(route="getchatmessagehistory", methods=[func.HttpMethod.GET])
 async def get_chat_message_history(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Log for Azure App Insights

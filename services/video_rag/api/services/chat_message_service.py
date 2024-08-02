@@ -10,7 +10,7 @@ class ChatMessageService:
     def __init__(self):
         self._chat_message_repository = ChatMessageRepository()
     
-    async def get_message_history_async(self, session_id) -> List[BaseMessage]:
+    async def get_chat_message_history_async(self, session_id) -> List[BaseMessage]:
         # Get Relevant Documents from Repository
         chat_message_dtos = await self._chat_message_repository.get_chat_message_history_async(session_id)
         

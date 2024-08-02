@@ -1,4 +1,4 @@
 from pydantic import BaseModel
 
-class GetMessageHistoryRequest(BaseModel):
+class GetChatMessageHistoryRequest(BaseModel):
     session_id: str

@@ -12,7 +12,6 @@ from services.video_rag.api.functions.models.get_chat_message_history_response i
 bp = func.Blueprint()
 
 # Service Registration
-# TODO: Create Message Service
 _messageService = ChatMessageService()
 
 @bp.function_name('GetChatMessageHistory')
@@ -34,10 +33,10 @@ async def get_chat_message_history(req: func.HttpRequest) -> func.HttpResponse:
         # Map to response
         get_message_history_response = GetChatMessageHistoryResponse(
             session_id=chat_history_model.session_id,
-            messages=chat_history_model.chat_messages
+            chat_messages=chat_history_model.chat_messages
         )
         
-        return func.HttpResponse(get_message_history_response.model_dump_json(), status_code=200)
+        return func.HttpResponse(get_message_history_response.json(), status_code=200)
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
         

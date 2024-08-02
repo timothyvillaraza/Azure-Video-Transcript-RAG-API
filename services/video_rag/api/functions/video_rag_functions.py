@@ -34,10 +34,10 @@ def save_video_transcript(req: func.HttpRequest) -> func.HttpResponse:
     # Validation logic
 
     # Service Layer Call
-    video_transcript_model = _videoRagService.save_video_transcript_embeddings("TODO: USER_ID", request.video_ids)
+    video_transcript_model = _videoRagService.save_video_transcript_embeddings("TODO: SESSION_ID", request.video_ids)
     
     # Map to response
-    save_video_transcript_response = save_video_transcript_response = SaveVideoTranscriptResponse(
+    save_video_transcript_response = SaveVideoTranscriptResponse(
         successful_video_ids=video_transcript_model.successful_video_ids,
         failed_video_ids=video_transcript_model.failed_video_ids
     )

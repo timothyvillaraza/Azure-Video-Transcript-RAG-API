@@ -1,6 +1,5 @@
 from typing import List
 
-class MessageModel:
+class InferenceModel:
     def __init__(self, response: str):
-        self.session_id: str
-        self.messages = response
+        self.response = response

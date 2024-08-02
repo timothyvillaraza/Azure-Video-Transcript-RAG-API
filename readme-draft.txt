@@ -10,10 +10,10 @@ Project Architecture:
     OpenAI LLM and Embeddings (will have to specify which ones later)
     PGVector Extension on PG Vector
     
-    Creating New Endpoints
+    Creating New (function) Endpoints
         - Only using blueprints
         - services/myservice/api/functions/myfunctions.py
-        - Registed blueprint in function_app.py
+        - Register blueprint in function_app.py
             from services.example_service.api.functions.myfunction import bp as blueprint_service_test_functions
             from services.video_rag.api.functions.video_rag_functions import bp as blueprint_video_rag_functions
 

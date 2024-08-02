@@ -1,7 +1,7 @@
-from langchain_core.messages.base import BaseMessage
-from pydantic import BaseModel
+from langchain_core.messages import BaseMessage
+from pydantic.v1 import BaseModel
 from typing import List
 
 class GetChatMessageHistoryResponse(BaseModel):
     session_id: str
-    messages: List[BaseMessage]
+    chat_messages: List[BaseMessage]

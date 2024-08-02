@@ -29,13 +29,12 @@ async def get_chat_message_history(req: func.HttpRequest) -> func.HttpResponse:
         # Validation logic
 
         # Service Layer Call
-        # List[BaseMessage] type? Or maybe List[MessageModel] if we go down the custom message class route
-        get_chat_message_history_model = await _messageService.get_chat_message_history_async(request.session_id)
+        chat_history_model = await _messageService.get_chat_message_history_async(request.session_id)
         
         # Map to response
         get_message_history_response = GetChatMessageHistoryResponse(
-            session_id=get_chat_message_history_model.session_id
-            messages=get_message_history_model.messages,
+            session_id=chat_history_model.session_id,
+            messages=chat_history_model.chat_messages
         )
         
         return func.HttpResponse(get_message_history_response.model_dump_json(), status_code=200)

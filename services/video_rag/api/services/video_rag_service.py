@@ -19,7 +19,7 @@ class VideoRagService:
         self._youtubeTranscriptService = YouTubeTranscriptService()
         self._transcriptRepository = TranscriptRepository()
     
-    def save_video_transcript_embeddings(self, user_id: str, video_ids: List[str]) -> TranscriptEmbeddingsModel:
+    def save_video_transcript_embeddings(self, session_id: str, video_ids: List[str]) -> TranscriptEmbeddingsModel:
         # Get Transcripts
         transcripts, failed_video_ids = self._youtubeTranscriptService.get_youtube_transcripts_async(video_ids)
         

@@ -4,8 +4,9 @@ import json
 # Services
 from services.video_rag.api.services.chat_message_service import ChatMessageService
 # Requests/Response
-from services.video_rag.api.functions.models.get_chat_message_history_request import GetChatMessageHistoryRequest
-from services.video_rag.api.functions.models.get_chat_message_history_response import GetChatMessageHistoryResponse
+from services.video_rag.api.functions.models.chat_message_history.get_chat_message_history_request import GetChatMessageHistoryRequest
+from services.video_rag.api.functions.models.chat_message_history.get_chat_message_history_response import GetChatMessageHistoryResponse
+from services.video_rag.api.functions.models.chat_message_history.chat_message_response import ChatMessageResponse 
 
 
 # App Registration
@@ -28,15 +29,15 @@ async def get_chat_message_history(req: func.HttpRequest) -> func.HttpResponse:
         # Validation logic
 
         # Service Layer Call
-        chat_history_model = await _messageService.get_chat_message_history_async(request.session_id)
+        chat_message_history_model = await _messageService.get_chat_message_history_async(request.session_id)
         
         # Map to response
         get_message_history_response = GetChatMessageHistoryResponse(
-            session_id=chat_history_model.session_id,
-            chat_messages=chat_history_model.chat_messages
+            session_id=chat_message_history_model.session_id,
+            chat_messages=[ChatMessageResponse(chat_message_id=src.chat_message_id, chat_message_type_id=src.chat_message_type_id, content=src.content) for src in chat_message_history_model.chat_messages]
         )
         
-        return func.HttpResponse(get_message_history_response.json(), status_code=200)
+        return func.HttpResponse(get_message_history_response.model_dump_json(), status_code=200)
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
         

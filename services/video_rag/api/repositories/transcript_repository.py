@@ -49,7 +49,7 @@ class TranscriptRepository:
                 self.vectorstore.add_documents(docs_list)
                 
                 # Add video id to db through sqlalchemy's session
-                new_video = VideoDto(external_video_id=external_video_id, user_id='TODO')
+                new_video = VideoDto(external_video_id=external_video_id, session_id='TODO')
                 self.session.add(new_video)
                 self.session.commit()
                 

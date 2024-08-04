@@ -8,5 +8,5 @@ class VideoDto(Base):
     
     video_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     external_video_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
-    user_id: Mapped[str] = mapped_column(String, nullable=False)
+    session_id: Mapped[str] = mapped_column(String, nullable=False)
     create_date: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

@@ -23,13 +23,6 @@ class VideoRAGChain:
         self.table_name = "chat_message" # Table name that stores langchain managed messages
         PostgresChatMessageHistory.create_tables(self.sync_connection, self.table_name)
         
-    # Helper Function
-    def get_session_history_memory(self, session_id) -> ConversationBufferMemory:
-        pg_chat_message_history = PostgresChatMessageHistory(self.table_name, session_id, sync_connection=self.sync_connection)
-        
-        return ConversationBufferMemory(llm=self.chat_model, chat_memory=pg_chat_message_history, memory_key='history', max_token_limit=100, return_messages=True)
-
-        
     def get_inference_with_context(self, session_id: str, user_query: str, context: List[Document]):
         # Define the system template using Jinja2
         system_template = """
@@ -65,7 +58,7 @@ class VideoRAGChain:
         runnable = ConversationChain(
             prompt=prompt,
             llm=self.chat_model,
-            memory=self.get_session_history_memory(session_id),
+            memory=self._get_session_history_memory(session_id),
             verbose=True
         )
 
@@ -76,3 +69,8 @@ class VideoRAGChain:
         
         return llm_response['response']
         
+    # Helper Function
+    def _get_session_history_memory(self, session_id) -> ConversationBufferMemory:
+        pg_chat_message_history = PostgresChatMessageHistory(self.table_name, session_id, sync_connection=self.sync_connection)
+        
+        return ConversationBufferMemory(llm=self.chat_model, chat_memory=pg_chat_message_history, memory_key='history', max_token_limit=100, return_messages=True)

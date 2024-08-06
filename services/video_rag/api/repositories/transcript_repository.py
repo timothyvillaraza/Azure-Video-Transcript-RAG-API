@@ -8,6 +8,7 @@ from langchain_openai import OpenAIEmbeddings
 from services.video_rag.api.repositories.models.transcript_embeddings_dto import TranscriptEmbeddingsDto
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from datetime import datetime
 
 # Ensure the environment variables are correctly set
 PG_VECTOR_DRIVER = os.getenv('PG_VECTOR_DRIVER')
@@ -39,7 +40,7 @@ class TranscriptRepository:
         self.session = self.Session()
     
     # TODO: Make Async
-    def save_transcript_embeddings(self, documents: List[Document]) -> TranscriptEmbeddingsDto:
+    def save_transcript_embeddings(self, session_id: str, documents: List[Document]) -> TranscriptEmbeddingsDto:
         successful_video_ids = [] # IDs of videos that sucessfully generated and save embeddings
         failed_video_ids = [] # IDs of videos that failed generated and save embeddings
 
@@ -49,7 +50,7 @@ class TranscriptRepository:
                 self.vectorstore.add_documents(docs_list)
                 
                 # Add video id to db through sqlalchemy's session
-                new_video = VideoDto(external_video_id=external_video_id, session_id='TODO')
+                new_video = VideoDto(external_video_id=external_video_id, session_id=session_id, create_date=datetime.now(), is_active=True)
                 self.session.add(new_video)
                 self.session.commit()
                 

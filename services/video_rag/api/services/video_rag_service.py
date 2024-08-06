@@ -27,7 +27,7 @@ class VideoRagService:
         transcript_chunks_documents = _create_documents(transcripts)
         
         # Save documents
-        transcript_embeddings_dto = self._transcriptRepository.save_transcript_embeddings(transcript_chunks_documents)
+        transcript_embeddings_dto = self._transcriptRepository.save_transcript_embeddings(session_id, transcript_chunks_documents)
         
         # Collect failed video ids from the transcript api and the embedding process for returning it to the function
         failed_video_ids.extend(transcript_embeddings_dto.failed_video_ids)
@@ -41,11 +41,9 @@ class VideoRagService:
         # Get Relevant Documents from Repository
         retrieved_documents = self._transcriptRepository.get_by_semantic_relevance(query, 1)
         
-        
         # Get response from LLM
         video_rag_chain = VideoRAGChain()
         llm_response = video_rag_chain.get_inference_with_context(session_id, query, retrieved_documents)
-        
         
         inference_model = InferenceModel(response=llm_response)
         

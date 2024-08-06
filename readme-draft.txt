@@ -3,26 +3,15 @@ Project Architecture:
         Read More about it here: https://medium.com/slalom-build/introducing-black-slope-a-dotnet-core-reference-architecture-from-slalom-build-3f1452eb62ef
 
     A lot of left over or straignt up uneeded structure
-    Azure Functions Python V2 Model
-    Python 3.11.2
-    bulk of code in services/video_rag/api/functions/video_rag_functions.py
-    Lang Chain
-    OpenAI LLM and Embeddings (will have to specify which ones later)
-    PGVector Extension on PG Vector
     
-    Creating New (function) Endpoints
-        - Only using blueprints
-        - services/myservice/api/functions/myfunctions.py
-        - Register blueprint in function_app.py
-            from services.example_service.api.functions.myfunction import bp as blueprint_service_test_functions
-            from services.video_rag.api.functions.video_rag_functions import bp as blueprint_video_rag_functions
+    Dependencies
+        Python 3.11.2
+        LangChain (Will deprecate as LangChain v2 is poorly documented and seems unready for production use, very poor postgres integration)
+        Azure Functions Python V2 Model
+        PGVector Extension on PG Vector
+        SQLAlchemy + Alembic
 
-            app = func.FunctionApp()
-
-            # Register other functions
-            app.register_blueprint(blueprint_service_test_functions)
-            app.register_blueprint(blueprint_video_rag_functions)
-
+    OpenAI LLM and Embeddings (will have to specify which ones later)
 
 Starting Project:
     Use python environment
@@ -49,6 +38,8 @@ Starting Project:
             }
         to localsettings.json
     Can debug with Python F5
+    
+    # Could be outdated #
     Set environment variables
         OPENAI_KEY = 
 
@@ -59,7 +50,7 @@ Starting Project:
         PG_VECTOR_PORT = 
         PG_VECTOR_DATABASE_NAME = 
 
-        DB_CONNECTION_STRING =
+        PG_VECTOR_CONNECTION_STRING =
 
     
 
@@ -91,11 +82,31 @@ Local Development:
     Set up azurite emulator for blob storage or other containers locally
     run azurite command to start it
 
-Setting Up Pipeline:
-    On the portal, use the deployment center and connect to the github repo
+Code Structure
+    Bulk of code in services/video_rag, the entry point (and good starting point when browsing code) would be any of the function files
 
-Deploying:
-    pip freeze > requirements.txt
+    Azure Function Python v2 Model Functions (See Local Development for examples)
+    - Only using blueprints
+    - services/myservice/api/functions/myfunctions.py
+    - Register blueprint in function_app.py
+        from services.example_service.api.functions.myfunction import bp as blueprint_service_test_functions
+        from services.video_rag.api.functions.video_rag_functions import bp as blueprint_video_rag_functions
+
+        app = func.FunctionApp()
+
+        # Register other functions
+        app.register_blueprint(blueprint_service_test_functions)
+        app.register_blueprint(blueprint_video_rag_functions)
+
+CI/CD
+    Setting Up Pipeline:
+        The initial project structure was made with func init {project name} --python v2
+            - This makes it pretty easy to use the deployment center on azure portal to deploy it 
+        On the portal, use the deployment center on the azure portal and connect to the github repo
+
+    Deploying:
+        requirements.txt is important for the dependencies
+        pip freeze > requirements.txt
 
 Testing Endpoints:
     Get Function URL from Azure from the Function App
@@ -104,149 +115,161 @@ Testing Endpoints:
 Set Environment Variables on Function App:
     OPEN_AI KEY and a bunch of other PGVector Keys
 
-[Adding Database Tables]
-    [Setting up models on a brand new service]
-        Uses SQLAlchemy and Alembic
+[DATABASE]
+    [How to initailize all database tables]
+        1. (If project was ran previously)
+            Drop all tables from db
+            Delete all alembic migrations in alembic_migrations/versions (versions folder should be empty)
 
-        Make sure to create a shared declarative_base() defined in services/[service name]/repositories/models/__init__.py
-        Any models should import from that
+        2. (To initialize sqlalchemy/alembic managed db tables)
+            alembic revision --autogenerate -m "init"
+            alembic migrate head
 
-        example:
+        3. (To initalize langchain managed db tables)
+            Use the SaveVideoTranscript End Point
 
-            # models __init__.py 
-            import pkgutil
-            import importlib
-            import os
-            from sqlalchemy.orm import declarative_base
+    [Adding Database Tables]
+        [Setting up models on a brand new service]
+            Uses SQLAlchemy and Alembic
 
-            # Import this in alembic_migrations/config/autogenerate_base_metadatas.py
-            from services.video_rag.api.repositories.models import Base as video_rag_base
+            Make sure to create a shared declarative_base() defined in services/[service name]/repositories/models/__init__.py
+            Any models should import from that
 
-            autogenerate_base_metadatas = [
-                video_rag_base.metadata,
-                # Other service models
-            ]
+            example:
 
-            # Import all other modules in current package for Alembic's autogenerate in env.py target_metadata.
-            # This ensures that all models are registered with the Base metadata, allowing Alembic to detect
-            # and include all tables when generating migration scripts without the need to manually import each model.
-            package_dir = os.path.dirname(__file__)
-            for (module_loader, name, ispkg) in pkgutil.iter_modules([package_dir]):
-                importlib.import_module(f"{__name__}.{name}")
+                # models __init__.py 
+                import pkgutil
+                import importlib
+                import os
+                from sqlalchemy.orm import declarative_base
 
-            # mymodel.py
-            from services.video_rag.api.repositories.models import Base
-            from sqlalchemy.orm import Mapped, mapped_column
-            from datetime import datetime
+                # Import this in alembic_migrations/config/autogenerate_base_metadatas.py
+                from services.video_rag.api.repositories.models import Base as video_rag_base
 
-            class VideoDto(Base):
-                __tablename__ = 'video'
-                video_id: Mapped[int] = mapped_column(primary_key=True)
-                user_id: Mapped[str]
-                create_date: Mapped[datetime]
+                autogenerate_base_metadatas = [
+                    video_rag_base.metadata,
+                    # Other service models
+                ]
 
-        Make sure that in the alembic env.py, we set target_metadata = autogenerate_base_metadatas from autogenerate_base_metadatas
+                # Import all other modules in current package for Alembic's autogenerate in env.py target_metadata.
+                # This ensures that all models are registered with the Base metadata, allowing Alembic to detect
+                # and include all tables when generating migration scripts without the need to manually import each model.
+                package_dir = os.path.dirname(__file__)
+                for (module_loader, name, ispkg) in pkgutil.iter_modules([package_dir]):
+                    importlib.import_module(f"{__name__}.{name}")
 
-        Edit autogenerate_base_metadatas.py to include models from different services
-            Example:
-            # Include Base Metadatas 
-            from services.video_rag.api.repositories.models import Base as video_rag_base
+                # mymodel.py
+                from services.video_rag.api.repositories.models import Base
+                from sqlalchemy.orm import Mapped, mapped_column
+                from datetime import datetime
 
-            autogenerate_base_metadatas = [
-                video_rag_base.metadata,
-                # Other service models
-            ]
+                class VideoDto(Base):
+                    __tablename__ = 'video'
+                    video_id: Mapped[int] = mapped_column(primary_key=True)
+                    user_id: Mapped[str]
+                    create_date: Mapped[datetime]
 
-        Steps to ensure Alembic autogenerates migrations correctly:
+            Make sure that in the alembic env.py, we set target_metadata = autogenerate_base_metadatas from autogenerate_base_metadatas
 
-            1. Ensure the shared Base is defined in the models/__init__.py file.
-            
-            2. Import all modules in the current package dynamically to register all models:
-                - Use pkgutil and importlib to import all models in the __init__.py file.
+            Edit autogenerate_base_metadatas.py to include models from different services
+                Example:
+                # Include Base Metadatas 
+                from services.video_rag.api.repositories.models import Base as video_rag_base
 
-            3. Define your models to inherit from the shared Base:
-                - Example model definition in mymodel.py as shown above.
+                autogenerate_base_metadatas = [
+                    video_rag_base.metadata,
+                    # Other service models
+                ]
 
-            4. Configure Alembic to use the shared metadata in env.py:
-                - Set target_metadata = autogenerate_base_metadatas.
+            Steps to ensure Alembic autogenerates migrations correctly:
 
-            5. Ensure all service models are included in autogenerate_base_metadatas.py:
-                - Import Base from each service and add its metadata to the autogenerate_base_metadatas list.
+                1. Ensure the shared Base is defined in the models/__init__.py file.
+                
+                2. Import all modules in the current package dynamically to register all models:
+                    - Use pkgutil and importlib to import all models in the __init__.py file.
 
-            6. Run Alembic commands to generate and apply migrations:
-                - Use alembic revision --autogenerate -m "message" to generate migration scripts.
-                - Use alembic upgrade head to apply the migrations to the database.
+                3. Define your models to inherit from the shared Base:
+                    - Example model definition in mymodel.py as shown above.
 
-    [Adding Tables to existing service]
-        Uses SQLAlchemy and Alembic
+                4. Configure Alembic to use the shared metadata in env.py:
+                    - Set target_metadata = autogenerate_base_metadatas.
 
-        Ensure the shared declarative_base() is defined in services/[service name]/repositories/models/__init__.py
+                5. Ensure all service models are included in autogenerate_base_metadatas.py:
+                    - Import Base from each service and add its metadata to the autogenerate_base_metadatas list.
 
-        Define your models to inherit from the shared Base:
+                6. Run Alembic commands to generate and apply migrations:
+                    - Use alembic revision --autogenerate -m "message" to generate migration scripts.
+                    - Use alembic upgrade head to apply the migrations to the database.
 
-            # mymodel.py
-            from services.video_rag.api.repositories.models import Base
-            from sqlalchemy.orm import Mapped, mapped_column
-            from datetime import datetime
+        [Adding Tables to existing service]
+            Uses SQLAlchemy and Alembic
 
-            class VideoDto(Base):
-                __tablename__ = 'video'
-                video_id: Mapped[int] = mapped_column(primary_key=True)
-                user_id: Mapped[str]
-                create_date: Mapped[datetime]
+            Ensure the shared declarative_base() is defined in services/[service name]/repositories/models/__init__.py
 
-        Make sure that in the alembic env.py, we set target_metadata = autogenerate_base_metadatas from autogenerate_base_metadatas
+            Define your models to inherit from the shared Base:
 
-        Steps to ensure Alembic autogenerates migrations correctly:
+                # mymodel.py
+                from services.video_rag.api.repositories.models import Base
+                from sqlalchemy.orm import Mapped, mapped_column
+                from datetime import datetime
 
-            1. Ensure the shared Base is defined in the models/__init__.py file.
-            
-            2. Import all modules in the current package dynamically to register all models:
-                - Use pkgutil and importlib to import all models in the __init__.py file.
+                class VideoDto(Base):
+                    __tablename__ = 'video'
+                    video_id: Mapped[int] = mapped_column(primary_key=True)
+                    user_id: Mapped[str]
+                    create_date: Mapped[datetime]
 
-            3. Define your models to inherit from the shared Base:
-                - Example model definition in mymodel.py as shown above.
+            Make sure that in the alembic env.py, we set target_metadata = autogenerate_base_metadatas from autogenerate_base_metadatas
 
-            4. Configure Alembic to use the shared metadata in env.py:
-                - Set target_metadata = autogenerate_base_metadatas.
+            Steps to ensure Alembic autogenerates migrations correctly:
 
-            5. Run Alembic commands to generate and apply migrations:
-                - Use alembic revision --autogenerate -m "message" to generate migration scripts.
-                - Use alembic upgrade head to apply the migrations to the database.
+                1. Ensure the shared Base is defined in the models/__init__.py file.
+                
+                2. Import all modules in the current package dynamically to register all models:
+                    - Use pkgutil and importlib to import all models in the __init__.py file.
 
-    [To ignore tables that are not managed by SQLAlchemy during the Alembic autogenerate process]
-    Update your `env.py` and create an `autogenerate_excluded_tables.py` file.
-        env.py:
+                3. Define your models to inherit from the shared Base:
+                    - Example model definition in mymodel.py as shown above.
 
-            from alembic_migrations.config.autogenerate_excluded_tables import autogenerate_excluded_tables
+                4. Configure Alembic to use the shared metadata in env.py:
+                    - Set target_metadata = autogenerate_base_metadatas.
 
-            target_metadata = autogenerate_base_metadatas
+                5. Run Alembic commands to generate and apply migrations:
+                    - Use alembic revision --autogenerate -m "message" to generate migration scripts.
+                    - Use alembic upgrade head to apply the migrations to the database.
 
-            for metadata in target_metadata:
-                print("Metadata tables:", metadata.tables.keys())
+        [To ignore tables that are not managed by SQLAlchemy during the Alembic autogenerate process]
+        Update your `env.py` and create an `autogenerate_excluded_tables.py` file.
+            env.py:
 
-            # Function to exclude database tables not managed by SQLAlchemy
-            def include_object(object, name, type_, reflected, compare_to):
-                print(f"Processing object: name={name}, type={type_}, reflected={reflected}")
-                if type_ == "table":
-                    if name in autogenerate_excluded_tables:
-                        print(f"Excluding table: {name}")
-                        return False
-                    else:
-                        print(f"Including table: {name}")
-                        return True
-                return True
+                from alembic_migrations.config.autogenerate_excluded_tables import autogenerate_excluded_tables
 
-        autogenerate_excluded_tables.py:
+                target_metadata = autogenerate_base_metadatas
 
-            autogenerate_excluded_tables = [
-                # LangChain Managed Tables
-                "langchain_pg_collection",
-                "langchain_pg_embedding"
-            ]
+                for metadata in target_metadata:
+                    print("Metadata tables:", metadata.tables.keys())
 
+                # Function to exclude database tables not managed by SQLAlchemy
+                def include_object(object, name, type_, reflected, compare_to):
+                    print(f"Processing object: name={name}, type={type_}, reflected={reflected}")
+                    if type_ == "table":
+                        if name in autogenerate_excluded_tables:
+                            print(f"Excluding table: {name}")
+                            return False
+                        else:
+                            print(f"Including table: {name}")
+                            return True
+                    return True
 
-Deploying Migrations (Putting Tables Online)
-    env.py put in connection string in .env
-    alembic revision --autogenerate -m "message"
-    alembic upgrade head
+            autogenerate_excluded_tables.py:
+
+                autogenerate_excluded_tables = [
+                    # LangChain Managed Tables
+                    "langchain_pg_collection",
+                    "langchain_pg_embedding"
+                ]
+
+    Deploying Migrations (Putting Tables Online)
+        env.py put in connection string in .env
+        alembic revision --autogenerate -m "message"
+        alembic upgrade head

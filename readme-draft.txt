@@ -52,12 +52,11 @@ Starting Project:
 
         PG_VECTOR_CONNECTION_STRING =
 
-    
+    Create a session by calling the get session endpoint
 
     Reference Videos:
         Learn Azure Functions Python V2 (Local Setup and Examples)
         https://www.youtube.com/watch?v=I-kodc4bs4I
-
         
         Learn Azure Functions Python V2 (Part 2: Deploy, Configure, and Use in Azure)
         https://www.youtube.com/watch?v=_349bwtFkE8

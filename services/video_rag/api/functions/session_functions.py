@@ -14,7 +14,7 @@ bp = func.Blueprint()
 # Service Registration
 _sessionService = SessionService()
 
-@bp.function_name('get_session')
+@bp.function_name('GetSession')
 @bp.route(route="getsession", methods=[func.HttpMethod.GET])
 async def get_session(req: func.HttpRequest) -> func.HttpResponse:
     try:

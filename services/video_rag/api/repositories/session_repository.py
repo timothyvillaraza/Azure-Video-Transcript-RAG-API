@@ -1,5 +1,7 @@
 import os
+import uuid
 import psycopg
+from datetime import datetime
 from typing import List
 from services.video_rag.api.repositories.models.session_dto import SessionDto
 from sqlalchemy import create_engine
@@ -18,11 +20,19 @@ class SessionRepository:
         self.session = self.Session()
 
     async def get_session_by_id_async(self, session_id: str) -> SessionDto:     
-        try:
+        query = select(SessionDto).where(SessionDto.session_id == session_id and SessionDto.is_active == True)
+        
+        try:    
             # TODO: Is this async?
-            session_dto = select(SessionDto).where(SessionDto.session_id == session_id and SessionDto.is_active == True)
+            session_dto = self.session.execute(query).scalar_one()
             
+            # TODO: Could be a race condition with the above line
+            # Check for existence of session
+            if session_dto is None:
+                session_dto = SessionDto(session_id=str(uuid.uuid4()), create_date=datetime.now(), is_active= True)
+                self.session.add(session_dto)
+                self.session.commit()
+
+            return session_dto
         except Exception as e:
             self.session.rollback() 
-        
-        return session_dto

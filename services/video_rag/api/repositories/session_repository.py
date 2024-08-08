@@ -1,8 +1,7 @@
 import os
-import uuid
 import psycopg
+import uuid
 from datetime import datetime
-from typing import List
 from services.video_rag.api.repositories.models.session_dto import SessionDto
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker

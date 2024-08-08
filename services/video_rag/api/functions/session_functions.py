@@ -4,8 +4,8 @@ import json
 # Services
 from services.video_rag.api.services.session_service import SessionService
 # Requests/Response
-from services.video_rag.api.functions.models.chat_message_history.get_session_request import GetSessionRequest
-from services.video_rag.api.functions.models.chat_message_history.get_session_response import GetSessionResponse
+from services.video_rag.api.functions.models.get_session_request import GetSessionRequest
+from services.video_rag.api.functions.models.get_session_response import GetSessionResponse
 
 
 # App Registration
@@ -15,7 +15,7 @@ bp = func.Blueprint()
 _sessionService = SessionService()
 
 @bp.function_name('GetSession')
-@bp.route(route="getsession", methods=[func.HttpMethod.GET])
+@bp.route(route="getsession", methods=[func.HttpMethod.POST])
 async def get_session(req: func.HttpRequest) -> func.HttpResponse:
     try:
         # Log for Azure App Insights

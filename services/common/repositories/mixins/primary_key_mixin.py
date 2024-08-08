@@ -14,4 +14,6 @@ class PrimaryKeyMixin:
         
         primary_key_column = primary_key_columns[0]
         primary_key_name = primary_key_column.name
+        
         return f"{cls.__tablename__}.{primary_key_name}"
+    

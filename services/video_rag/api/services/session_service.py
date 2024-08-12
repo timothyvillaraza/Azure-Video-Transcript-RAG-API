@@ -5,10 +5,10 @@ from services.video_rag.api.services.models.session_model import SessionModel
 
 class SessionService:
     def __init__(self):
-        self._chat_message_repository = SessionRepository()
+        self._session_repository = SessionRepository()
         
     async def get_session_by_id_async(self, session_id) -> SessionModel:
-        session_dto = await self._chat_message_repository.get_session_by_id_async(session_id)
+        session_dto = await self._session_repository.get_session_by_id_async(session_id)
         
         if session_dto is None:
             return None
@@ -16,9 +16,14 @@ class SessionService:
         return SessionModel(session_dto.session_id, session_dto.create_date, session_dto.is_active)
 
     async def get_or_create_session_by_id_async(self, session_id) -> SessionModel:
-        session_dto = await self._chat_message_repository.get_session_by_id_async(session_id)
+        session_dto = await self._session_repository.get_session_by_id_async(session_id)
         
         if session_dto is None:
-            session_dto = await self._chat_message_repository.create_session_async()
+            session_dto = await self._session_repository.create_session_async()
+        
+        return SessionModel(session_dto.session_id, session_dto.create_date, session_dto.is_active)
+    
+    async def expire_sessions(self) -> None:
+        session_dto = await self._session_repository.expire_sessions(session_id)
         
         return SessionModel(session_dto.session_id, session_dto.create_date, session_dto.is_active)

@@ -40,4 +40,3 @@ async def get_or_create_session(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(f"An unexpected error occurred: {str(e)}")
         
         return func.HttpResponse(str(e), status_code=getattr(e, 'status_code', 400))
-    

@@ -16,7 +16,7 @@ class ChatMessageService:
         # Get Relevant Documents from Repository
         chat_history_dtos = await self._chat_message_repository.get_chat_message_history_async(session_id)
         
-        # Map to modelk
+        # Map to model
         chat_message_history_model = self._map_chat_message_history_model(session_id, chat_history_dtos)
         
         return chat_message_history_model

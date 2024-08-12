@@ -1,8 +1,11 @@
 import azure.functions as func
 import logging
-import json
 # Services
 from services.video_rag.api.services.chat_message_service import ChatMessageService
+
+# Utilities
+from services.common.utilities.session_authorizer import SessionAuthorizer
+
 # Requests/Response
 from services.video_rag.api.functions.models.chat_message_history.get_chat_message_history_request import GetChatMessageHistoryRequest
 from services.video_rag.api.functions.models.chat_message_history.get_chat_message_history_response import GetChatMessageHistoryResponse
@@ -24,9 +27,11 @@ async def get_chat_message_history(req: func.HttpRequest) -> func.HttpResponse:
         
         # Parse request body
         request = GetChatMessageHistoryRequest(**req.get_json())
+        
+        # Authorize Session
+        await SessionAuthorizer.authorize_async(request.session_id)
 
         # Validate Request
-        # Validation logic
 
         # Service Layer Call
         chat_message_history_model = await _messageService.get_chat_message_history_async(request.session_id)
@@ -41,5 +46,5 @@ async def get_chat_message_history(req: func.HttpRequest) -> func.HttpResponse:
     except Exception as e:
         logging.error(f"An unexpected error occurred: {str(e)}")
         
-        return func.HttpResponse("Error Message", status_code=400)
+        return func.HttpResponse(str(e), status_code=getattr(e, 'status_code', 400))
     

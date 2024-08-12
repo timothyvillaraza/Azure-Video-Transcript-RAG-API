@@ -1,6 +1,9 @@
 import azure.functions as func
 import logging
-import json
+
+# Utilities
+from services.common.utilities.session_authorizer import SessionAuthorizer
+
 # Services
 from services.video_rag.api.services.video_service import VideoService
 # Requests/Response
@@ -25,13 +28,12 @@ async def get_videos(req: func.HttpRequest) -> func.HttpResponse:
         
         # Parse request body
         request = GetVideosRequest(**req.get_json())
+        
+        # Authorize Session
+        await SessionAuthorizer.authorize_async(request.session_id)
 
         # Validate Request
-        # TODO: Validate SessionId (TODO: What to do if they tried to use an expired one from going AFK)
-        # Throw exception if invalid
         
-        # Validation logic
-
         # Service Layer Call
         # List[VideoModel]
         video_models = await _videoService.get_videos_by_session_id_async(request.session_id)
@@ -42,10 +44,8 @@ async def get_videos(req: func.HttpRequest) -> func.HttpResponse:
         )
         
         return func.HttpResponse(response.model_dump_json(), status_code=200)
-    except Exception as e:
-        logging.error(f"An unexpected error occurred: {str(e)}")
-        
-        return func.HttpResponse("Error Message", status_code=400)
+    except Exception as e:        
+        return func.HttpResponse(str(e), status_code=getattr(e, 'status_code', 400))
 
 # Map VideoModel -> Video Response
 def _map_video_model(video_model: VideoModel) -> VideoResponse:

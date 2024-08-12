@@ -22,15 +22,18 @@ class SessionRepository:
         query = select(SessionDto).where(SessionDto.session_id == session_id and SessionDto.is_active == True)
         
         try:    
-            # TODO: Is this async?
-            session_dto = self.session.execute(query).scalar_one()
+            session_dto = self.session.execute(query).scalar_one_or_none()
+
+            return session_dto
+        except Exception as e:
+            self.session.rollback()
             
-            # TODO: Could be a race condition with the above line
-            # Check for existence of session
-            if session_dto is None:
-                session_dto = SessionDto(session_id=str(uuid.uuid4()), create_date=datetime.now(), is_active= True)
-                self.session.add(session_dto)
-                self.session.commit()
+    async def create_session_async(self) -> SessionDto:     
+        try:
+            # TODO: Is this async?
+            session_dto = SessionDto(session_id=str(uuid.uuid4()), create_date=datetime.now(), is_active= True)
+            self.session.add(session_dto)
+            self.session.commit()
 
             return session_dto
         except Exception as e:

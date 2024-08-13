@@ -20,7 +20,7 @@ if config.config_file_name is not None:
 
 # Allow interpolation vars to be passed to alembic.ini from the host environment
 section = config.config_ini_section
-config.set_section_option(section, "DB_CONNECTION_STRING", os.environ.get("PG_CONNECTION_STRING"))
+config.set_section_option(section, "DB_CONNECTION_STRING", os.environ.get("PG_VECTOR_CONNECTION_STRING"))
 
 # Add your model's MetaData object here for 'autogenerate' support
 # from myapp import mymodel

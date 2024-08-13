@@ -1,5 +1,7 @@
+import os
 import azure.functions as func
 import logging
+from datetime import datetime
 # Services
 from services.video_rag.api.services.session_service import SessionService
 
@@ -40,3 +42,10 @@ async def get_or_create_session(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(f"An unexpected error occurred: {str(e)}")
         
         return func.HttpResponse(str(e), status_code=getattr(e, 'status_code', 400))
+
+@bp.function_name(name="sessionexpiretimer")
+@bp.schedule(schedule="0 0 * * *", arg_name="sessionexpiretimer", run_on_startup=False, use_monitor=False)
+async def session_expire_timer(sessionexpiretimer: func.TimerRequest) -> None:
+    sessions_deleted_count = await _sessionService.expire_sessions_async(session_lifetime_min=int(os.getenv('SESSION_EXPIRE_MINUTES')))
+
+    logging.info(f'Timer trigger function ran at {datetime.now()}. {sessions_deleted_count} deleted.')

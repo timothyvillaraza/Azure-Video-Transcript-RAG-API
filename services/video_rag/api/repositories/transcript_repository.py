@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List
+from typing import List, Tuple
 from services.video_rag.api.repositories.models.video_dto import VideoDto
 from langchain.docstore.document import Document
 from langchain_postgres import PGVector
@@ -20,19 +20,8 @@ PG_VECTOR_DATABASE_NAME = os.getenv('PG_VECTOR_DATABASE_NAME')
 
 class TranscriptRepository:
     def __init__(self):
-        self.open_ai_embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_KEY"))
-        self.collection_name = 'transcripts' # Used as entry in DB. SELECT * FROM langchain_pg_collection 
-        
         # Construct the connection string
         self.CONNECTION_STRING = f"{PG_VECTOR_DRIVER}://{PG_VECTOR_USER}:{PG_VECTOR_PASSWORD}@{PG_VECTOR_HOST}:{PG_VECTOR_PORT}/{PG_VECTOR_DATABASE_NAME}"
-        
-        # LANGCHAIN CONNECTION
-        self.vectorstore = PGVector(
-            embeddings=self.open_ai_embeddings,
-            collection_name=self.collection_name,
-            connection=self.CONNECTION_STRING,
-            use_jsonb=True,
-        )
         
         # SQLALCHEMY CONNECTION
         self.engine = create_engine(self.CONNECTION_STRING)
@@ -41,13 +30,15 @@ class TranscriptRepository:
     
     # TODO: Make Async
     def save_transcript_embeddings(self, session_id: str, documents: List[Document]) -> TranscriptEmbeddingsDto:
+        pg_vectorstore = self._get_vector_store(session_id)
+        
         successful_video_ids = [] # IDs of videos that sucessfully generated and save embeddings
         failed_video_ids = [] # IDs of videos that failed generated and save embeddings
 
         for external_video_id, docs_list in documents.items():
             try:
                 # Add document to db through langchain's vectorstore
-                self.vectorstore.add_documents(docs_list)
+                pg_vectorstore.add_documents(docs_list)
                 
                 # Add video id to db through sqlalchemy's session
                 new_video = VideoDto(external_video_id=external_video_id, session_id=session_id, create_date=datetime.now(), is_active=True)
@@ -63,11 +54,21 @@ class TranscriptRepository:
         # Transcript DTO
         return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)
     
-    # TODO: Make Async
-    def get_by_semantic_relevance(self, query: str, results_count: int = 1) -> List[Document]:
-        # async: asimilary_search
-        # TODO: Add try catch block
-        return self.vectorstore.similarity_search(query, results_count)
+    async def get_by_semantic_relevance_async(self, query: str, results_count: int = 1) -> List[Tuple[Document, float]]:
+        # TODO: async: asimilary_search
+        return self.vectorstore.similarity_search_with_score(query=query, k=results_count)
+    
+    # Langchain Managed PGVector connection
+    def _get_vector_store(self, session_id: str):
+        open_ai_embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_KEY"))
+        
+        # LANGCHAIN CONNECTION
+        return PGVector(
+            embeddings=open_ai_embeddings,
+            collection_name=session_id,
+            connection=self.CONNECTION_STRING,
+            use_jsonb=True,
+        )
     
     # Currently a DEBUG Function.
     def drop_all_embeddings(self) -> bool:

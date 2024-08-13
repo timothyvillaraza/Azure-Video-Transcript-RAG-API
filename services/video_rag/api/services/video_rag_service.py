@@ -37,13 +37,15 @@ class VideoRagService:
         
         return transcript_embeddings_model
     
-    def get_inference(self, session_id: str, query: str, create_date: datetime) -> InferenceModel:
+    async def get_inference_async(self, session_id: str, query: str, create_date: datetime) -> InferenceModel:
         # Get Relevant Documents from Repository
-        retrieved_documents = self._transcriptRepository.get_by_semantic_relevance(query, 1)
+        retrieved_documents = await self._transcriptRepository.get_by_semantic_relevance_async(query, 1)
+        # TODO: Optimize Retrevial
+        temp = [document for document, score in retrieved_documents]
         
         # Get response from LLM
         video_rag_chain = VideoRAGChain()
-        llm_response = video_rag_chain.get_inference_with_context(session_id, query, retrieved_documents)
+        llm_response = video_rag_chain.get_inference_with_document_context(session_id, query, temp)
         
         inference_model = InferenceModel(response=llm_response)
         

@@ -23,7 +23,7 @@ class VideoRAGChain:
         self.table_name = "chat_message" # Table name that stores langchain managed messages
         PostgresChatMessageHistory.create_tables(self.sync_connection, self.table_name)
         
-    def get_inference_with_context(self, session_id: str, user_query: str, context: List[Document]):
+    def get_inference_with_document_context(self, session_id: str, user_query: str, context: List[Document]):
         # Define the system template using Jinja2
         system_template = """
         SYSTEM PROMPT:

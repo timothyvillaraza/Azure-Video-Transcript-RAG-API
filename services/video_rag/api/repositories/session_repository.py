@@ -1,11 +1,13 @@
 import os
 import psycopg
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from services.video_rag.api.repositories.models.session_dto import SessionDto
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy import select
+from sqlalchemy import select, delete
+from langchain_postgres import PGVector
+from langchain_openai import OpenAIEmbeddings
 
 class SessionRepository:
     def __init__(self):
@@ -38,3 +40,44 @@ class SessionRepository:
             return session_dto
         except Exception as e:
             self.session.rollback() 
+            
+    async def expire_sessions_async(self, session_lifetime_min: int) -> int:
+        try:
+            # Query for sessions past their lifetime
+            expired_sessions_query = select(SessionDto).where(datetime.now() >= SessionDto.create_date + timedelta(minutes=session_lifetime_min))
+            expired_sessions_result = self.session.execute(expired_sessions_query).scalars().all()
+            expired_session_ids = [row.session_id for row in expired_sessions_result]
+            
+            if expired_session_ids:
+                # Delete Sessions
+                delete_sessions_query = delete(SessionDto).where(SessionDto.session_id.in_(expired_session_ids))
+                delete_result = self.session.execute(delete_sessions_query)
+                
+                for session_id in expired_session_ids:
+                    self._get_vector_store(session_id).delete_collection()
+                
+                # delete_collection_query = text("DELETE FROM langchain_pg_collection WHERE session_id IN :ids")
+                # delete_embeddings_query = text("DELETE FROM langchain_pg_embedding WHERE session_id IN :ids")
+                
+                # self.session.execute(delete_collection_query, {'ids': tuple(expired_session_ids)})
+                # self.session.execute(delete_embeddings_query, {'ids': tuple(expired_session_ids)})
+            
+
+                self.session.commit()
+            
+            
+
+            return delete_result.rowcount
+        except Exception as e:
+            self.session.rollback() 
+
+    def _get_vector_store(self, session_id: str):
+        open_ai_embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_KEY"))
+        
+        # LANGCHAIN CONNECTION
+        return PGVector(
+            embeddings=open_ai_embeddings,
+            collection_name=session_id,
+            connection=os.getenv('PG_VECTOR_CONNECTION_STRING'),
+            use_jsonb=True,
+        )

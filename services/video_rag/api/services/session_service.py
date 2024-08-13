@@ -23,7 +23,7 @@ class SessionService:
         
         return SessionModel(session_dto.session_id, session_dto.create_date, session_dto.is_active)
     
-    async def expire_sessions(self) -> None:
-        session_dto = await self._session_repository.expire_sessions(session_id)
+    async def expire_sessions_async(self, session_lifetime_min: int) -> int:
+        sessions_deleted_count = await self._session_repository.expire_sessions_async(session_lifetime_min)
         
-        return SessionModel(session_dto.session_id, session_dto.create_date, session_dto.is_active)
+        return sessions_deleted_count

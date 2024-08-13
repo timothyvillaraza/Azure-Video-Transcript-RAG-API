@@ -9,7 +9,7 @@ from services.video_rag.api.functions.session_functions import bp as blueprint_s
 from services.video_rag.api.functions.video_functions import bp as blueprint_video_functions
 
 app = func.FunctionApp()
-
+#
 # Register other functions
 app.register_blueprint(blueprint_service_test_functions)
 # app.register_blueprint(blueprint_chat_message_functions)

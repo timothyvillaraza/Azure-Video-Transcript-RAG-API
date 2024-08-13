@@ -272,3 +272,9 @@ Set Environment Variables on Function App:
         env.py put in connection string in .env
         alembic revision --autogenerate -m "message"
         alembic upgrade head
+
+[DEBUGGING ON DEPLOY]
+    How to view exception logs:
+        https://github.com/Azure/azure-functions-python-worker/issues/1262#issuecomment-2119241515
+
+        Example: Helped me debug function endpoints working locally but not showing up after being deployed. There was a run time error on app start up that wouldn't show up anywhere.

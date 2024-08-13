@@ -8,7 +8,7 @@ class VideoDto(Base):
     __tablename__ = 'video'
     
     video_id: Mapped[int] = mapped_column(Integer, primary_key=True)
-    external_video_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    external_video_id: Mapped[str] = mapped_column(String, nullable=False)
     session_id: Mapped[str] = mapped_column(ForeignKey(SessionDto.get_primary_key_with_table()))
     create_date: Mapped[datetime] = mapped_column(DateTime, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False)

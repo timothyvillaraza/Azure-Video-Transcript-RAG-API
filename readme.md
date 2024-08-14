@@ -1,3 +1,24 @@
+# About the Project
+
+This proof of concept project is designed to explore and demonstrate the integration of Retrieval Augmented Generation (RAG), Azure deployments, and CI/CD practices. The backend is fully developed and deployable, ready to be integrated with a front-end application for seamless interaction. The application provides session-based private conversations without requiring user accounts and features a chatbot that uses transcripts, pulled from user-specified YouTube URLs, to answer questions.
+
+### Key Features
+
+- **Retrieval Augmented Generation (RAG) Chatbot:**
+  - Users can provide a list of YouTube URLs, and the server pulls the video transcripts based on those URLs.
+  - The chatbot uses these transcripts as the source of context for answering user queries.
+  - Generates responses based on the provided transcripts, allowing for contextually relevant and accurate answers.
+
+- **Server-Side Session Management:**
+  - Custom-built functionality that allows users to have private conversations without needing to create an account.
+  - Manages the creation and tracking of user sessions.
+  - Handles session authorization and expiration.
+  - Includes automatic cleanup of expired sessions and related data.
+
+- **Deployable Backend:**
+  - The backend is fully deployable and ready for integration with a front-end application.
+  - CI/CD pipeline setup is streamlined using Azure's Deployment Center.
+
 # Project Architecture
 
 ### Reference Architecture

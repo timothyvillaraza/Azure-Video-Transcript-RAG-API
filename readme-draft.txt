@@ -43,18 +43,18 @@ Starting Project:
     Set environment variables
         OPENAI_KEY = ''
 
-        PG_VECTOR_DRIVER = ''
+        PG_VECTOR_DRIVER = 'postgresql+psycopg'
         PG_VECTOR_USER = ''
         PG_VECTOR_PASSWORD = ''
         PG_VECTOR_HOST = ''
         PG_VECTOR_PORT = ''
         PG_VECTOR_DATABASE_NAME = ''
-        PG_VECTOR_CONNECTION_STRING = ''
+        PG_VECTOR_CONNECTION_STRING = 'postgresql+psycopg://[rest of string]'
 
-        PG_CONNECTION_STRING = ''
+        PG_CONNECTION_STRING = 'postgresql://[rest of string]'
 
-        SESSION_EXPIRE_MINUTES = ''
-        LANGCHAIN_CHAT_MESSAGE_TABLE_NAME = ''
+        SESSION_EXPIRE_MINUTES = '15'
+        LANGCHAIN_CHAT_MESSAGE_TABLE_NAME = 'langchain_chat_message'
 
     Create a session by calling the get session endpoint
 

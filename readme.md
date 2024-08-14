@@ -3,7 +3,7 @@
 ### Reference Architecture
 - Reference Architecture from BlackSlope Architecture .NET framework
   - Read More about it here: [Introducing BlackSlope](https://medium.com/slalom-build/introducing-black-slope-a-dotnet-core-reference-architecture-from-slalom-build-3f1452eb62ef)
-- Note: There is a lot of leftover or unneeded structure.
+- Note: There is a lot of leftover or unneeded structure as the project developed.
 
 ### Dependencies
 - Python 3.11.2

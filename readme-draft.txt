@@ -39,18 +39,22 @@ Starting Project:
         to localsettings.json
     Can debug with Python F5
     
-    # Could be outdated #
+    # Values as of 08/13/2024
     Set environment variables
-        OPENAI_KEY = 
+        OPENAI_KEY = ''
 
-        PG_VECTOR_DRIVER = 'postgresql+psycopg'
-        PG_VECTOR_USER = 
-        PG_VECTOR_PASSWORD = 
-        PG_VECTOR_HOST = 
-        PG_VECTOR_PORT = 
-        PG_VECTOR_DATABASE_NAME = 
+        PG_VECTOR_DRIVER = ''
+        PG_VECTOR_USER = ''
+        PG_VECTOR_PASSWORD = ''
+        PG_VECTOR_HOST = ''
+        PG_VECTOR_PORT = ''
+        PG_VECTOR_DATABASE_NAME = ''
+        PG_VECTOR_CONNECTION_STRING = ''
 
-        PG_VECTOR_CONNECTION_STRING =
+        PG_CONNECTION_STRING = ''
+
+        SESSION_EXPIRE_MINUTES = ''
+        LANGCHAIN_CHAT_MESSAGE_TABLE_NAME = ''
 
     Create a session by calling the get session endpoint
 
@@ -64,7 +68,7 @@ Starting Project:
 Azure Infra Setup:
     There's a DeployResources project
     azd something command on DeployResouces/deploy-functions-resources.ps1, would have to set unique names
-    Set environment variables for the function app
+    Set environment variables for the function app (see starting project section)
 
     Create Postgres DB then add extension from portal side
         - Connect and run SQL query: {SQL QUERY FOR EXTENSION VECTOR HERE}
@@ -96,6 +100,27 @@ Code Structure
         # Register other functions
         app.register_blueprint(blueprint_service_test_functions)
         app.register_blueprint(blueprint_video_rag_functions)
+
+[SESSIONS]
+    Session Verification
+        At every endpoint call (except GetOrCreateSession endpoint) sessions are checked with the SessionAuthorizer.
+    
+        Globally, every session has an expiration time determined by the environment variable SESSION_EXPIRE_MINUTES 
+
+    Creating Sessions
+        GetOrCreateSession
+            Provides new session id if
+                Invalid ID: The requested one doesn't return a session from the database
+                Session Expired: The session exists but the create_date is older than create_date + [ENV VARIABLE] SESSION_EXPIRE_MINUTES
+
+    Session Expiration
+        chron job session_expire_timer
+            Runs at midnight and checks for every session that has expired and will cascade delete any sessions.
+            Locally testing, I changed run_on_startup=False to True so that the funciton triggers every time I locally run the project 
+        NOTE:
+            Any of the langchain manged tables (denoted by langchain_pg_[table name]) has to be handled through the langchain libraries
+            An example of a langchain managed db tables are langchain_pg_collection and langchian_pg_emebdding. These have to be managed through langchain-pgvector class: PGVector
+            A full list of non sqlalchemy managed tables can be found in alembic_migrations/config/autogenerate_excluded_tables.py
 
 CI/CD
     Setting Up Pipeline:

@@ -42,34 +42,37 @@ class SessionRepository:
             self.session.rollback() 
             
     async def expire_sessions_async(self, session_lifetime_min: int) -> int:
+        sessions_deleted_count = 0
+        
         try:
             # Query for sessions past their lifetime
             expired_sessions_query = select(SessionDto).where(datetime.now() >= SessionDto.create_date + timedelta(minutes=session_lifetime_min))
             expired_sessions_result = self.session.execute(expired_sessions_query).scalars().all()
             expired_session_ids = [row.session_id for row in expired_sessions_result]
             
+            # TODO: Long term, I would like to drop langchain and have everything managed by sqlalchemy. That way, cascade delete would properly delete all associated rows as opposed to having dlete each table by session_id.
+            # Delete session ids
             if expired_session_ids:
-                # Delete Sessions
+                # Cascade Delete Sessions
                 delete_sessions_query = delete(SessionDto).where(SessionDto.session_id.in_(expired_session_ids))
                 delete_result = self.session.execute(delete_sessions_query)
                 
+                # Cascade Delete langchain collections
                 for session_id in expired_session_ids:
                     self._get_vector_store(session_id).delete_collection()
                 
-                # delete_collection_query = text("DELETE FROM langchain_pg_collection WHERE session_id IN :ids")
-                # delete_embeddings_query = text("DELETE FROM langchain_pg_embedding WHERE session_id IN :ids")
+                # Delete Chat Messagesm
+                delete_chat_message_query = text("DELETE FROM chat_message WHERE session_id IN :ids")
                 
-                # self.session.execute(delete_collection_query, {'ids': tuple(expired_session_ids)})
-                # self.session.execute(delete_embeddings_query, {'ids': tuple(expired_session_ids)})
-            
+                self.session.execute(delete_chat_message_query, {'ids': tuple(expired_session_ids)})            
 
                 self.session.commit()
-            
-            
-
-            return delete_result.rowcount
+                
+                sessions_deleted_count = delete_result.rowcount
         except Exception as e:
-            self.session.rollback() 
+            self.session.rollback()
+            
+        return sessions_deleted_count
 
     def _get_vector_store(self, session_id: str):
         open_ai_embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_KEY"))

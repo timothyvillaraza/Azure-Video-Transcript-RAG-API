@@ -39,8 +39,9 @@ class VideoRagService:
     
     async def get_inference_async(self, session_id: str, query: str, create_date: datetime) -> InferenceModel:
         # Get Relevant Documents from Repository
-        retrieved_documents = await self._transcriptRepository.get_by_semantic_relevance_async(query, 1)
-        # TODO: Optimize Retrevial
+        retrieved_documents = await self._transcriptRepository.get_by_semantic_relevance_async(session_id, query, 1)
+        
+        # TODO: Optimize Retrevial by cleaning up embedded document sources (currently each chunk contains timestamps), adding additional heuristics, or changing the embedding model
         temp = [document for document, score in retrieved_documents]
         
         # Get response from LLM

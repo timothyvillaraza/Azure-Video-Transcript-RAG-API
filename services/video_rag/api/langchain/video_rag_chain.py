@@ -20,7 +20,7 @@ class VideoRAGChain:
         self.sync_connection = psycopg.connect(os.getenv('PG_CONNECTION_STRING'))
         
         # Create the table schema (only needs to be done once)
-        self.table_name = "chat_message" # Table name that stores langchain managed messages
+        self.table_name = os.getenv('LANGCHAIN_CHAT_MESSAGE_TABLE_NAME') # Table name that stores langchain managed messages
         PostgresChatMessageHistory.create_tables(self.sync_connection, self.table_name)
         
     def get_inference_with_document_context(self, session_id: str, user_query: str, context: List[Document]):

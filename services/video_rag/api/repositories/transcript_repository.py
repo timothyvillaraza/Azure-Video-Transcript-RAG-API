@@ -54,10 +54,11 @@ class TranscriptRepository:
         # Transcript DTO
         return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)
     
-    async def get_by_semantic_relevance_async(self, query: str, results_count: int = 1) -> List[Tuple[Document, float]]:
+    async def get_by_semantic_relevance_async(self, session_id: str, query: str, results_count: int = 1) -> List[Tuple[Document, float]]:
         # TODO: async: asimilary_search
-        return self.vectorstore.similarity_search_with_score(query=query, k=results_count)
+        return self._get_vector_store(session_id).similarity_search_with_score(query=query, k=results_count)
     
+    # TODO: This removed self.vectorstore that would be common across all other functions. Right now, this
     # Langchain Managed PGVector connection
     def _get_vector_store(self, session_id: str):
         open_ai_embeddings = OpenAIEmbeddings(model="text-embedding-3-small", openai_api_key=os.getenv("OPENAI_KEY"))
@@ -71,9 +72,9 @@ class TranscriptRepository:
         )
     
     # Currently a DEBUG Function.
-    def drop_all_embeddings(self) -> bool:
+    def drop_all_embeddings(self, session_id, str) -> bool:
         try:
-            self.vectorstore.drop_tables()
+            self._get_vector_store(session_id).drop_tables()
             logging.info("Successfully dropped all embeddings.")
             return True
         except Exception as e:

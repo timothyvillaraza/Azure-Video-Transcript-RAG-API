@@ -75,9 +75,10 @@ Azure Infra Setup:
 
     Deploy after local development: func azure functionapp publish myapplications
 
-    Trouble Shooting:
+    Troubleshooting:
         No functions appearing on portal
             - Probably not working locally as well, fix errors there
+            - See [DEBUGGING ON DEPLOY] section
 
 Local Development:
     use python environment
@@ -124,6 +125,8 @@ Code Structure
 
 CI/CD
     Setting Up Pipeline:
+        GitHub actions was used to setup the CI/CD pipeline
+            I forgot which option it is, but I think the option is basic authentication so that creating new identies wasn't needed
         The initial project structure was made with func init {project name} --python v2
             - This makes it pretty easy to use the deployment center on azure portal to deploy it 
         On the portal, use the deployment center on the azure portal and connect to the github repo
@@ -131,6 +134,11 @@ CI/CD
     Deploying:
         requirements.txt is important for the dependencies
         pip freeze > requirements.txt
+
+    Troubleshooting
+        If endpoints aren't showing up in the functionapp on the portal, make sure there are no errors when running the app locally
+        If endpoints are still not showing up despite it working locally, see the [DEBUGGING ON DEPLOY] section
+            - The debugger for seeing exceptions is kind of hidden and not easy to find
 
 Testing Endpoints:
     Get Function URL from Azure from the Function App

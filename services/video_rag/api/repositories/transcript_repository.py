@@ -48,8 +48,8 @@ class TranscriptRepository:
                 successful_video_ids.append(external_video_id)
             except Exception as e:
                 failed_video_ids.append(external_video_id)
-                self.session.rollback() 
-                print(f"Error adding documents for video_id: {external_video_id}. Error: {e}")
+                self.session.rollback()
+                logging.exception(f"Error adding documents for video_id: {external_video_id}. Error: {e}")
 
         # Transcript DTO
         return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)

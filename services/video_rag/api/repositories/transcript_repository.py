@@ -36,20 +36,15 @@ class TranscriptRepository:
         failed_video_ids = [] # IDs of videos that failed generated and save embeddings
 
         for external_video_id, docs_list in documents.items():
-            try:
-                # Add document to db through langchain's vectorstore
-                pg_vectorstore.add_documents(docs_list)
-                
-                # Add video id to db through sqlalchemy's session
-                new_video = VideoDto(external_video_id=external_video_id, session_id=session_id, create_date=datetime.now(), is_active=True)
-                self.session.add(new_video)
-                self.session.commit()
-                
-                successful_video_ids.append(external_video_id)
-            except Exception as e:
-                failed_video_ids.append(external_video_id)
-                self.session.rollback()
-                logging.error(f"Error adding documents for video_id: {external_video_id}. Error: {e}")
+            # Add document to db through langchain's vectorstore
+            pg_vectorstore.add_documents(docs_list)
+            
+            # Add video id to db through sqlalchemy's session
+            new_video = VideoDto(external_video_id=external_video_id, session_id=session_id, create_date=datetime.now(), is_active=True)
+            self.session.add(new_video)
+            self.session.commit()
+            
+            successful_video_ids.append(external_video_id)
 
         # Transcript DTO
         return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)

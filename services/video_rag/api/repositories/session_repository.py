@@ -1,4 +1,5 @@
 import os
+import logging
 import psycopg
 import uuid
 from datetime import datetime, timedelta
@@ -53,6 +54,8 @@ class SessionRepository:
             # TODO: Long term, I would like to drop langchain and have everything managed by sqlalchemy. That way, cascade delete would properly delete all associated rows as opposed to having dlete each table by session_id.
             # Delete session ids
             if expired_session_ids:
+                logging.info(f"Expired Session Ids: {expired_session_ids}") 
+                
                 # Cascade Delete Sessions
                 delete_sessions_query = delete(SessionDto).where(SessionDto.session_id.in_(expired_session_ids))
                 delete_result = self.session.execute(delete_sessions_query)

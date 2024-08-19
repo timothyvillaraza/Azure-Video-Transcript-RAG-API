@@ -1,5 +1,4 @@
-# TODO: REMOVE
-import uuid
+import logging
 
 from typing import Dict, List
 from datetime import datetime
@@ -22,6 +21,9 @@ class VideoRagService:
     def save_video_transcript_embeddings(self, session_id: str, video_ids: List[str]) -> TranscriptEmbeddingsModel:
         # Get Transcripts
         transcripts, failed_video_ids = self._youtubeTranscriptService.get_youtube_transcripts_async(video_ids)
+        
+        if failed_video_ids:
+            logging.error(f'YouTubeTranscript API Error: Could not retrieve transcripts for {failed_video_ids}')
         
         # Create Langchain Documents from chunked transcripts
         transcript_chunks_documents = _create_documents(transcripts)

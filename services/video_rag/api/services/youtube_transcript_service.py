@@ -15,7 +15,8 @@ class YouTubeTranscriptService:
         try:
             transcripts, failed_video_ids = YouTubeTranscriptApi.get_transcripts(video_ids, continue_after_error=True)
         except (TranscriptsDisabled, VideoUnavailable, NoTranscriptFound) as e:
-            logging.error(f"An error occurred with specific video IDs: {str(e)}")
+            # Will not trigger if continue_after_error=True
+            logging.error(f"An YouTubeTranscriptApi error occurred with specific video IDs: {str(e)}")
             failed_video_ids.extend(e.video_id)
         except Exception as e:
             logging.error(f"An unexpected error with the YoutubeTranscriptApi: {str(e)}")

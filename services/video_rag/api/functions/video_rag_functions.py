@@ -58,7 +58,9 @@ async def get_inference(req: func.HttpRequest) -> func.HttpResponse:
     # Parse request body
     try:
         request = GetInferenceRequest(**req.get_json())
-        # Validate Request
+        
+        # Authorize Session
+        await SessionAuthorizer.authorize_async(request.session_id)
 
         # Service Layer Call
         get_inference_model = await _videoRagService.get_inference_async(request.session_id, request.query, request.create_date)

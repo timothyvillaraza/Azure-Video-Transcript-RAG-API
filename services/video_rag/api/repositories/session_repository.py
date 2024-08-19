@@ -54,8 +54,6 @@ class SessionRepository:
             # TODO: Long term, I would like to drop langchain and have everything managed by sqlalchemy. That way, cascade delete would properly delete all associated rows as opposed to having dlete each table by session_id.
             # Delete session ids
             if expired_session_ids:
-                logging.info(f"Expired Session Ids: {expired_session_ids}") 
-                
                 # Cascade Delete Sessions
                 delete_sessions_query = delete(SessionDto).where(SessionDto.session_id.in_(expired_session_ids))
                 delete_result = self.session.execute(delete_sessions_query)
@@ -65,7 +63,7 @@ class SessionRepository:
                     self._get_vector_store(session_id).delete_collection()
                 
                 # Delete Chat Messagesm
-                delete_chat_message_query = text("DELETE FROM chat_message WHERE session_id IN :ids")
+                delete_chat_message_query = text(f"DELETE FROM {os.getenv('LANGCHAIN_CHAT_MESSAGE_TABLE_NAME')} WHERE session_id IN :ids")
                 
                 self.session.execute(delete_chat_message_query, {'ids': tuple(expired_session_ids)})            
 
@@ -73,6 +71,7 @@ class SessionRepository:
                 
                 sessions_deleted_count = delete_result.rowcount
         except Exception as e:
+            logging.exception(f"Error expiring sessions: {e}")
             self.session.rollback()
             
         return sessions_deleted_count

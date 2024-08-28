@@ -25,7 +25,7 @@ class TranscriptRepository:
         
         # SQLALCHEMY CONNECTION
         self.engine = create_engine(self.CONNECTION_STRING)
-        self.Session = sessionmaker(bind=self.engine)
+        self.Session = sessionmaker(bind=self.engine) # TODO: Cannot figure out how to get async_session_manager to work
         self.session = self.Session()
     
     # TODO: Make Async
@@ -56,7 +56,8 @@ class TranscriptRepository:
     
     async def get_by_semantic_relevance_async(self, session_id: str, query: str, results_count: int = 1) -> List[Tuple[Document, float]]:
         # TODO: async: asimilary_search
-        return self._get_vector_store(session_id).similarity_search_with_score(query=query, k=results_count)
+        # NOTE: I have tried making this async twice already and cannot figure it out. 
+        return self._get_vector_store(session_id).max_marginal_relevance_search_with_score(query=query, float=0.5, k=20)
     
     # TODO: This removed self.vectorstore that would be common across all other functions. Right now, this
     # Langchain Managed PGVector connection

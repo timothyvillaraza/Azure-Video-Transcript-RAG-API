@@ -41,14 +41,15 @@ class VideoRagService:
     
     async def get_inference_async(self, session_id: str, query: str, create_date: datetime) -> InferenceModel:
         # Get Relevant Documents from Repository
-        retrieved_documents = await self._transcriptRepository.get_by_semantic_relevance_async(session_id, query, 1)
+        retrieved_documents_score_tuples = await self._transcriptRepository.get_by_semantic_relevance_async(session_id=session_id, query=query, results_count=1)
         
         # TODO: Optimize Retrevial by cleaning up embedded document sources (currently each chunk contains timestamps), adding additional heuristics, or changing the embedding model
-        temp = [document for document, score in retrieved_documents]
+        # TODO: [document for doc, score in docs_with_score if score > 0.8]
+        retrieved_documents = [document for document, score in retrieved_documents_score_tuples]
         
-        # Get response from LLM
+        # Save user message, get LLM response, save LLM response 
         video_rag_chain = VideoRAGChain()
-        llm_response = video_rag_chain.get_inference_with_document_context(session_id, query, temp)
+        llm_response = video_rag_chain.get_inference_with_document_context(session_id, query, retrieved_documents)
         
         inference_model = InferenceModel(response=llm_response)
         

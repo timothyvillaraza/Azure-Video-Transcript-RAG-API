@@ -62,7 +62,7 @@ class SessionRepository:
                 for session_id in expired_session_ids:
                     self._get_vector_store(session_id).delete_collection()
                 
-                # Delete Chat Messagesm
+                # Delete Chat Messages
                 delete_chat_message_query = text(f"DELETE FROM {os.getenv('LANGCHAIN_CHAT_MESSAGE_TABLE_NAME')} WHERE session_id IN :ids")
                 
                 self.session.execute(delete_chat_message_query, {'ids': tuple(expired_session_ids)})            

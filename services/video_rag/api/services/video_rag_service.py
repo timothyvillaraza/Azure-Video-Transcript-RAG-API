@@ -1,4 +1,6 @@
 import logging
+import requests
+from bs4 import BeautifulSoup, Comment
 
 from typing import Dict, List
 from datetime import datetime
@@ -26,7 +28,7 @@ class VideoRagService:
             logging.error(f'YouTubeTranscript API Error: Could not retrieve transcripts for {failed_video_ids}')
         
         # Create Langchain Documents from chunked transcripts
-        transcript_chunks_documents = _create_documents(transcripts)
+        transcript_chunks_documents = _create_transcript_documents(transcripts)
         
         # Save documents
         transcript_embeddings_dto = self._transcriptRepository.save_transcript_embeddings(session_id, transcript_chunks_documents)
@@ -54,11 +56,34 @@ class VideoRagService:
         inference_model = InferenceModel(response=llm_response)
         
         return inference_model
+    
+    async def save_resume_embeddings_from_iframe(self, url: str) -> None:
+        iframe_content = requests.get(url)
+        
+        if iframe_content.status_code == 200:
+            iframe_html_content = iframe_content.text
+
+            soup = BeautifulSoup(iframe_html_content, 'lxml')
+
+            resume_texts = _extract_all_text(soup)
+            
+            documents = [Document(page_content=text) for text in resume_texts]
+            
+            await self._transcriptRepository.save_resume_embeddings(documents)
+        else:
+            print(f"Failed to retrieve content from {url}")
+        
+        return
+      
+    async def delete_resume_embeddings(self) -> None:
+        await self._transcriptRepository.delete_resume_embeddings()
+        return
+        
 
 # =======================================
 # Helper Functions
 # =======================================
-def _create_documents(transcripts: Dict[str, List[Dict[str, str]]]) -> Dict[str, List[Document]]:
+def _create_transcript_documents(transcripts: Dict[str, List[Dict[str, str]]]) -> Dict[str, List[Document]]:
     # Return
     created_documents = {}
     
@@ -106,4 +131,18 @@ def _create_documents(transcripts: Dict[str, List[Dict[str, str]]]) -> Dict[str,
         
         created_documents[video_id] = documents
         
-    return created_documents
+    return created_documents    
+
+def _extract_all_text(soup) -> set[str]:
+    all_text_elements = set()
+
+    for element in soup.find_all(text=True):
+        # Exclude text from script, style, and similar non-visible elements
+        if element.parent.name not in ['style', 'script', 'head', 'title', 'meta', '[document]']:
+            # Exclude comments and non-visible elements
+            if not isinstance(element, Comment):
+                text = element.strip()  # Remove leading/trailing whitespace
+                if text and not element.isspace() and len(text) > 1:  # Only add non-empty strings and skip whitespace
+                    all_text_elements.add(text)
+
+    return all_text_elements

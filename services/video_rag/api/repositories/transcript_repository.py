@@ -59,6 +59,30 @@ class TranscriptRepository:
         # NOTE: I have tried making this async twice already and cannot figure it out. 
         return self._get_vector_store(session_id).max_marginal_relevance_search_with_score(query=query, float=0.5, k=20)
     
+    async def save_resume_embeddings(self, documents: List[Document]) -> None:
+        pg_vectorstore = self._get_vector_store("resume")
+
+        try:
+            # Add document to db through langchain's vectorstore
+            pg_vectorstore.add_documents(documents)
+            
+        except Exception as e:
+            logging.error(f"Error saving resume embedding: {e}")
+
+        return
+    
+    async def delete_resume_embeddings(self) -> None:
+        pg_vectorstore = self._get_vector_store("resume")
+
+        try:
+            # Add document to db through langchain's vectorstore
+            pg_vectorstore.delete_collection()
+            
+        except Exception as e:
+            logging.error(f"Error saving resume embedding: {e}")
+
+        return
+    
     # TODO: This removed self.vectorstore that would be common across all other functions. Right now, this
     # Langchain Managed PGVector connection
     def _get_vector_store(self, session_id: str):

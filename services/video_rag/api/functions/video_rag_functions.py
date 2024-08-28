@@ -1,6 +1,7 @@
 import azure.functions as func
 import logging
 import json
+from datetime import datetime
 # Services
 from services.video_rag.api.services.video_rag_service import VideoRagService
 # Utilities
@@ -79,3 +80,13 @@ async def get_inference(req: func.HttpRequest) -> func.HttpResponse:
         logging.error(f"An unexpected error occurred: {str(e)}")
     
         return func.HttpResponse(str(e), status_code=getattr(e, 'status_code', 400))
+
+@bp.function_name(name="embedresumetimer")
+@bp.schedule(schedule="0 0 * * *", arg_name="embedresumetimer", run_on_startup=True, use_monitor=False)
+async def embed_resume_timer(embedresumetimer: func.TimerRequest) -> None:
+    await _videoRagService.delete_resume_embeddings()
+    
+    iframe_url = 'https://resume.creddle.io/embed/6x3f8thxdss'
+    sessions_deleted_count = await _videoRagService.save_resume_embeddings_from_iframe(iframe_url)
+    
+    logging.info(f'Timer trigger function ran at {datetime.now()}. {sessions_deleted_count} deleted.')

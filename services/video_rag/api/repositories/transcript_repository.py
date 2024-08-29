@@ -57,7 +57,7 @@ class TranscriptRepository:
     async def get_by_semantic_relevance_async(self, session_id: str, query: str, results_count: int = 1) -> List[Tuple[Document, float]]:
         # TODO: async: asimilary_search
         # NOTE: I have tried making this async twice already and cannot figure it out. 
-        return self._get_vector_store(session_id).max_marginal_relevance_search_with_score(query=query, float=0.5, k=20)
+        return self._get_vector_store(session_id).max_marginal_relevance_search_with_score(query=query, float=0.5, k=results_count)
     
     async def save_resume_embeddings(self, documents: List[Document]) -> None:
         pg_vectorstore = self._get_vector_store("resume")

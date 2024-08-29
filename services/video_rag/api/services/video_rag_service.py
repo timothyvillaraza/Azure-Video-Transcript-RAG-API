@@ -11,8 +11,10 @@ from services.video_rag.api.services.youtube_transcript_service import YouTubeTr
 from services.video_rag.api.repositories.transcript_repository import TranscriptRepository
 # Chains
 from services.video_rag.api.langchain.video_rag_chain import VideoRAGChain
+from services.video_rag.api.openai.resume_openai import ResumeOpenAI
 # Models
 from services.video_rag.api.services.models.inference_model import InferenceModel
+from services.video_rag.api.services.models.resume_inference_model import ResumeInferenceModel
 from services.video_rag.api.services.models.transcript_embedding_model import TranscriptEmbeddingsModel
 
 class VideoRagService:
@@ -46,7 +48,7 @@ class VideoRagService:
         retrieved_documents_score_tuples = await self._transcriptRepository.get_by_semantic_relevance_async(session_id=session_id, query=query, results_count=1)
         
         # TODO: Optimize Retrevial by cleaning up embedded document sources (currently each chunk contains timestamps), adding additional heuristics, or changing the embedding model
-        # TODO: [document for doc, score in docs_with_score if score > 0.8]
+        # TODO: Example: [document for doc, score in docs_with_score if score > 0.8]
         retrieved_documents = [document for document, score in retrieved_documents_score_tuples]
         
         # Save user message, get LLM response, save LLM response 
@@ -56,6 +58,20 @@ class VideoRagService:
         inference_model = InferenceModel(response=llm_response)
         
         return inference_model
+    
+    async def get_resume_inference_async(self, query: str) -> ResumeInferenceModel:
+        # Get Relevant Documents from Repository
+        retrieved_documents_score_tuples = await self._transcriptRepository.get_by_semantic_relevance_async(session_id='resume', query=query, results_count=20)
+        
+        # TODO: Optimize Retrevial by cleaning up embedded document sources (currently each chunk contains timestamps), adding additional heuristics, or changing the embedding model
+        # TODO: Example: [document for doc, score in docs_with_score if score > 0.8]
+        retrieved_documents = [document for document, score in retrieved_documents_score_tuples]
+        
+        # Save user message, get LLM response, save LLM response 
+        resume_openai = ResumeOpenAI()
+        llm_response = await resume_openai.get_resume_inference_async(query, retrieved_documents)
+        
+        return llm_response
     
     async def save_resume_embeddings_from_iframe(self, url: str) -> None:
         iframe_content = requests.get(url)

@@ -87,6 +87,6 @@ async def embed_resume_timer(embedresumetimer: func.TimerRequest) -> None:
     await _videoRagService.delete_resume_embeddings()
     
     iframe_url = 'https://resume.creddle.io/embed/6x3f8thxdss'
-    sessions_deleted_count = await _videoRagService.save_resume_embeddings_from_iframe(iframe_url)
+    await _videoRagService.save_resume_embeddings_from_iframe(iframe_url)
     
-    logging.info(f'Timer trigger function ran at {datetime.now()}. {sessions_deleted_count} deleted.')
+    logging.info(f'Timer trigger function ran at {datetime.now()}. Resume embeddingss deleted.')

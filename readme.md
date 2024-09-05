@@ -21,6 +21,11 @@ This proof of concept project is designed to explore and demonstrate the integra
 
 # Project Architecture
 
+### Resume Data Flow
+![Azure Resume Rag](https://github.com/user-attachments/assets/1e071c88-191f-409a-a756-d4b9dc22cec6)
+
+
+
 ### Reference Architecture
 - Reference Architecture from BlackSlope Architecture .NET framework
   - Read More about it here: [Introducing BlackSlope](https://medium.com/slalom-build/introducing-black-slope-a-dotnet-core-reference-architecture-from-slalom-build-3f1452eb62ef)
@@ -31,7 +36,8 @@ This proof of concept project is designed to explore and demonstrate the integra
 - LangChain (Will deprecate as LangChain v2 is poorly documented and seems unready for production use, very poor Postgres integration)
 - Azure Functions Python V2 Model
 - PGVector Extension on PostgreSQL
-- SQLAlchemy + Alembic
+- SQLAlchemy + Alembic![Uploading Resume RAG (1).jpg…]()
+
 
 ### OpenAI LLM and Embeddings
 - Will have to specify which ones later.

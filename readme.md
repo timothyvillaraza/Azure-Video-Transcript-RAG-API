@@ -22,9 +22,7 @@ This proof of concept project is designed to explore and demonstrate the integra
 # Project Architecture
 
 ### Resume Data Flow
-![Azure Resume Rag](https://github.com/user-attachments/assets/1e071c88-191f-409a-a756-d4b9dc22cec6)
-
-
+![Untitled Diagram](https://github.com/user-attachments/assets/546ec618-c3e8-4e5a-93b7-bb050bb09159)
 
 ### Reference Architecture
 - Reference Architecture from BlackSlope Architecture .NET framework

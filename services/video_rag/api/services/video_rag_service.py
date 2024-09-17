@@ -61,10 +61,12 @@ class VideoRagService:
     
     async def get_resume_inference_async(self, query: str) -> ResumeInferenceModel:
         # Get Relevant Documents from Repository
-        retrieved_documents_score_tuples = await self._transcriptRepository.get_by_semantic_relevance_async(session_id='resume', query=query, results_count=20)
+        retrieved_documents_score_tuples = await self._transcriptRepository.get_by_semantic_relevance_async(session_id='resume', query=query, results_count=50)
         
-        # TODO: Optimize Retrevial by cleaning up embedded document sources (currently each chunk contains timestamps), adding additional heuristics, or changing the embedding model
-        # TODO: Example: [document for doc, score in docs_with_score if score > 0.8]
+        # TODO: Optimize retrieval by cleaning up embedded document sources, removing timestamps from chunks,
+        #       adding heuristics, or using a different embedding model.
+
+        # Example improvement: Filter documents by score > 0.8
         retrieved_documents = [document for document, score in retrieved_documents_score_tuples]
         
         # Save user message, get LLM response, save LLM response 

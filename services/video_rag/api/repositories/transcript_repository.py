@@ -54,8 +54,7 @@ class TranscriptRepository:
         # Transcript DTO
         return TranscriptEmbeddingsDto(successful_video_ids, failed_video_ids)
     
-    async def get_by_semantic_relevance_async(self, session_id: str, query: str, results_count: int = 1) -> List[Tuple[Document, float]]:
-        # TODO: async: asimilary_search
+    async def get_by_semantic_relevance_async(self, session_id: str, query: str, results_count: int = 1) -> List[Tuple[Document, float]]:        # TODO: async: asimilary_search
         # NOTE: I have tried making this async twice already and cannot figure it out. 
         return self._get_vector_store(session_id).max_marginal_relevance_search_with_score(query=query, float=0.5, k=results_count)
     
@@ -79,7 +78,7 @@ class TranscriptRepository:
             pg_vectorstore.delete_collection()
             
         except Exception as e:
-            logging.error(f"Error saving resume embedding: {e}")
+            logging.error(f"Error deleting resume embedding: {e}")
 
         return
     

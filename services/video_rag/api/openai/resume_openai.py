@@ -15,7 +15,7 @@ class ResumeOpenAI:
         completion = client.beta.chat.completions.parse(
             model="gpt-4o-2024-08-06",
             messages=[
-                {"role": "system", "content": "You are an interactive chat interface answering questions regarding the resume of Timothy Villaraza. Provide both the llm response and context sources that were used in the response"},
+                {"role": "system", "content": "You are an interactive chat interface answering questions regarding the resume of Timothy Villaraza. Provide both the llm response and context sources that were used in the response. The response must brief at 50 - 80 words max."},
                 {"role": "system", "content": context},
                 {"role": "user", "content": query},
             ],

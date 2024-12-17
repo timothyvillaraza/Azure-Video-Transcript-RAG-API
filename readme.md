@@ -21,9 +21,6 @@ This proof of concept project is designed to explore and demonstrate the integra
 
 # Project Architecture
 
-### Resume Data Flow
-![Untitled Diagram](https://github.com/user-attachments/assets/546ec618-c3e8-4e5a-93b7-bb050bb09159)
-
 ### Reference Architecture
 - Reference Architecture from BlackSlope Architecture .NET framework
   - Read More about it here: [Introducing BlackSlope](https://medium.com/slalom-build/introducing-black-slope-a-dotnet-core-reference-architecture-from-slalom-build-3f1452eb62ef)
